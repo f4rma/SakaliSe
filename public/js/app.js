@@ -91,7 +91,7 @@ createAnotherBtn.addEventListener('click', () => {
 
 // Socket.io: Listen for link access notifications
 socket.on('link-accessed', (data) => {
-  showNotification(`🔔 Your link "${data.judul}" was just accessed!`, 'info');
+  showNotification(`Your link "${data.judul}" was just accessed!`, 'info');
 });
 
 // Notification system

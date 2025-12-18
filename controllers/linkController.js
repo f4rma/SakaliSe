@@ -1,4 +1,4 @@
-const Link = require('../models/Link');
+const Link = require('../models/link');
 const { generateToken } = require('../src/utils/generateToken');
 const { sendEmail, sendAccessNotification } = require('../src/utils/emailService');
 
