@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LINKONCE - Share a Secret that Self-Destructs</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">
+        <h1>SakaliSe</h1>
+      </div>
+    </header>
+
+    <main>
+      <div class="hero">
+        <h2>Share a secret<br><span class="highlight">that self-destructs.</span></h2>
+        <p class="subtitle">Paste your password, private key, or sensitive message below. We'll generate a secure link that works <strong>exactly once.</strong></p>
+      </div>
+
+      <div class="form-container">
+        <form id="linkForm">
+          <div class="form-group">
+            <label for="judul">Title (Optional)</label>
+            <input type="text" id="judul" placeholder="e.g., Secret Password, API Key...">
+          </div>
+
+          <div class="form-group">
+            <label for="jenis_konten">Content Type</label>
+            <select id="jenis_konten" required>
+              <option value="text">Text Message</option>
+              <option value="password">Password</option>
+              <option value="url">URL/Link</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="isi_konten">Your Secret Message</label>
+            <textarea id="isi_konten" rows="6" placeholder="e.g., SuperSecretPassword123! or API Token..." required></textarea>
+            <span class="char-count">0 chars</span>
+          </div>
+
+          <div class="form-group">
+            <label for="email_pengirim">Your Email (for notifications) *</label>
+            <input type="email" id="email_pengirim" placeholder="you@example.com" required>
+          </div>
+
+          <div class="form-group">
+            <label for="email_penerima">Recipient Email (Optional)</label>
+            <input type="email" id="email_penerima" placeholder="recipient@example.com">
+            <small>If provided, we'll send the link directly to this email</small>
+          </div>
+
+          <div class="form-group checkbox-group">
+            <label>
+              <input type="checkbox" id="burn_after_reading" checked disabled>
+              <span class="fire-icon">🔥</span> Burns after reading
+            </label>
+          </div>
+
+          <button type="submit" class="btn-primary" id="submitBtn">
+            Create Secret Link
+          </button>
+        </form>
+
+        <div id="resultContainer" class="result-container hidden">
+          <div class="success-message">
+            <span class="check-icon">✅</span>
+            <h3>Link Created Successfully!</h3>
+          </div>
+
+          <div class="link-box">
+            <input type="text" id="generatedLink" readonly>
+            <button class="btn-copy" id="copyBtn">Copy</button>
+          </div>
+
+          <div class="warning-box">
+            <p>⚠️ <strong>Important:</strong> This link can only be used <strong>once</strong>. After it's opened, the content will be permanently destroyed.</p>
+          </div>
+
+          <div class="stats">
+            <div class="stat-item">
+              <span class="stat-label">Expires in:</span>
+              <span class="stat-value" id="expiryTime">24 hours</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Email sent:</span>
+              <span class="stat-value" id="emailStatus">No</span>
+            </div>
+          </div>
+
+          <button class="btn-secondary" id="createAnother">Create Another Link</button>
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      <p>© 2025 LINKONCE. Zero-knowledge one-time access system.</p>
+      <p><a href="#">Privacy</a> · <a href="#">Terms</a></p>
+    </footer>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>
