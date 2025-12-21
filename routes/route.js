@@ -1,17 +1,10 @@
 const express = require('express');
+const controller = require('../controllers/linkController');
+
 const router = express.Router();
-const linkController = require('../controllers/linkController');
 
-// Create new link
-router.post('/', linkController.createLink);
-
-// Check link status (without accessing)
-router.get('/:token/check', linkController.checkLink);
-
-// Access link (one-time)
-router.get('/:token', linkController.accessLink);
-
-// Get statistics
-router.get('/stats/all', linkController.getStats);
+router.post('/', controller.createLink);
+router.get('/:token/check', controller.checkLink);
+router.get('/:token', controller.accessLink);
 
 module.exports = router;
