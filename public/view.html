@@ -1,42 +1,43 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <title>SakaliSe – View</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="/socket.io/socket.io.js"></script>
+  <title>SakaliSe — View</title>
+  <link rel="stylesheet" href="/css/style.css" />
 </head>
+<body>
 
-<body class="min-h-screen bg-black text-white flex items-center justify-center">
+  <div class="container">
 
-  <div class="w-full max-w-2xl bg-zinc-900/80 backdrop-blur-xl rounded-2xl p-8 shadow-2xl">
-
-    <h2 id="judulPreview" class="text-2xl font-bold mb-4"></h2>
-
-    <div id="loading" class="text-gray-400">Loading...</div>
-
-    <div id="warning" class="hidden space-y-4">
-      <p class="text-yellow-400">⚠️ This content can only be opened once.</p>
-      <button
-        id="revealBtn"
-        class="w-full bg-neon hover:bg-green-500 text-black py-3 rounded-xl font-bold"
-      >
-        OPEN CONTENT
+    <!-- CONFIRM -->
+    <div class="card" id="confirm">
+      <h2>🔐 Konten Rahasia</h2>
+      <p class="muted">
+        Konten ini hanya dapat dibuka <b>sekali</b>.
+      </p>
+      <button id="openBtn" class="lock-btn">
+        BUKA KONTEN
       </button>
     </div>
 
-    <div id="content" class="hidden space-y-4">
-      <h3 id="judulKonten" class="text-xl font-semibold"></h3>
-      <p id="isiKonten" class="whitespace-pre-wrap"></p>
-      <div id="files" class="space-y-4"></div>
+    <!-- CONTENT -->
+    <div class="card" id="content" style="display:none">
+      <h2 id="judul">Secret Content</h2>
+      <p id="isi"></p>
+      <div id="files"></div>
     </div>
 
-    <div id="error" class="text-red-500 mt-4"></div>
+    <!-- BURNED -->
+    <div class="card" id="burned" style="display:none">
+      <h2>🔥 Konten Dihancurkan</h2>
+      <p class="muted">
+        Link ini telah digunakan atau dibuka di tempat lain.
+      </p>
+    </div>
 
   </div>
 
+  <script src="/socket.io/socket.io.js"></script>
   <script src="/js/view.js"></script>
 </body>
 </html>

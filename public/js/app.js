@@ -1,61 +1,70 @@
 const form = document.getElementById('form');
-const isiKonten = document.getElementById('isi_konten');
-const filesInput = document.getElementById('files');
-const emailInput = document.getElementById('email');
-
-const resultBox = document.getElementById('result');
+const modal = document.getElementById('modal');
 const resultLink = document.getElementById('resultLink');
 const copyBtn = document.getElementById('copyBtn');
+const closeModal = document.getElementById('closeModal');
 
-let activeType = 'text';
+const dropzone = document.getElementById('dropzone');
+const filesInput = document.getElementById('files');
+const fileList = document.getElementById('fileList');
 
 /* =========================
-   TAB HANDLER
+   DROPZONE
 ========================= */
-document.querySelectorAll('.tab-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.tab-btn').forEach(b => {
-      b.classList.remove('bg-white', 'text-black');
-      b.classList.add('bg-zinc-800');
-    });
+dropzone.addEventListener('click', () => filesInput.click());
 
-    btn.classList.add('bg-white', 'text-black');
-    btn.classList.remove('bg-zinc-800');
-
-    activeType = btn.dataset.type;
-    filesInput.classList.toggle('hidden', activeType === 'text');
-  });
+dropzone.addEventListener('dragover', e => {
+  e.preventDefault();
+  dropzone.classList.add('active');
 });
 
+dropzone.addEventListener('dragleave', () => {
+  dropzone.classList.remove('active');
+});
+
+dropzone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropzone.classList.remove('active');
+  filesInput.files = e.dataTransfer.files;
+  renderFiles();
+});
+
+filesInput.addEventListener('change', renderFiles);
+
+function renderFiles() {
+  fileList.innerHTML = '';
+  [...filesInput.files].forEach(file => {
+    const div = document.createElement('div');
+    div.className = 'file-item';
+    div.textContent = `📎 ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+    fileList.appendChild(div);
+  });
+}
+
 /* =========================
-   SUBMIT
+   SUBMIT FORM
 ========================= */
 form.addEventListener('submit', async e => {
   e.preventDefault();
 
-  const formData = new FormData();
-  formData.append('isi_konten', isiKonten.value);
-  formData.append('email', emailInput.value);
-
-  for (const file of filesInput.files) {
-    formData.append('files', file);
-  }
+  const fd = new FormData(form);
+  [...filesInput.files].forEach(f => fd.append('files', f));
 
   try {
     const res = await fetch('/api/links', {
       method: 'POST',
-      body: formData
+      body: fd
     });
 
-    const data = await res.json();
+    const json = await res.json();
 
-    if (!data.success) {
-      alert(data.message || 'Failed to create link');
+    if (!json.success) {
+      alert(json.message || 'Failed to create link');
       return;
     }
 
-    resultBox.classList.remove('hidden');
-    resultLink.value = data.data.shareUrl;
+    resultLink.value = json.data.shareUrl;
+    modal.classList.remove('hidden');
 
   } catch (err) {
     console.error(err);
@@ -64,10 +73,16 @@ form.addEventListener('submit', async e => {
 });
 
 /* =========================
-   COPY
+   MODAL ACTIONS
 ========================= */
-copyBtn.addEventListener('click', () => {
+copyBtn.onclick = () => {
   navigator.clipboard.writeText(resultLink.value);
-  copyBtn.textContent = 'COPIED';
-  setTimeout(() => (copyBtn.textContent = 'COPY'), 1500);
-});
+  copyBtn.textContent = 'Copied!';
+  setTimeout(() => (copyBtn.textContent = 'Copy'), 1200);
+};
+
+closeModal.onclick = () => {
+  modal.classList.add('hidden');
+  form.reset();
+  fileList.innerHTML = '';
+};

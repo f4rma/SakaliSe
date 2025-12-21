@@ -1,50 +1,124 @@
-const transporter = require('../../config/email');
+// src/utils/emailService.js
+const pengirimEmail = require('../../config/email');
 
-exports.sendEmail = async ({ to, subject, html }) => {
+/**
+ * Low-level email sender
+ */
+const sendEmail = async ({ to, subject, html }) => {
   try {
-    const info = await transporter.sendMail({
-      from: `"LINKONCE" <${process.env.SMTP_USER}>`,
+    const info = await pengirimEmail.sendMail({
+      from: `"SakaliSe" <${process.env.SMTP_USER}>`,
       to,
       subject,
       html
     });
 
-    console.log('Email sent:', info.messageId);
+    console.log('Email dikirim:', info.messageId);
     return info;
   } catch (error) {
-    console.error('Email sending failed:', error);
+    console.error('Gagal mengirim email:', error);
     throw error;
   }
 };
 
-exports.sendAccessNotification = async ({ to, judul, token, waktu_diakses, ip_address }) => {
-  try {
-    const html = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #ef4444;">🔔 Link Accessed - LINKONCE</h2>
-        <p>Your one-time link has been accessed and destroyed.</p>
-        <div style="background: #fef2f2; padding: 20px; border-left: 4px solid #ef4444; margin: 20px 0;">
-          <p style="margin: 0;"><strong>Title:</strong> ${judul}</p>
-          <p style="margin: 10px 0 0 0;"><strong>Token:</strong> ${token.substring(0, 16)}...</p>
-          <p style="margin: 10px 0 0 0;"><strong>Accessed at:</strong> ${new Date(waktu_diakses).toLocaleString()}</p>
-          <p style="margin: 10px 0 0 0;"><strong>IP Address:</strong> ${ip_address}</p>
-        </div>
-        <p style="color: #6b7280; font-size: 14px;">
-          This link is now permanently destroyed and cannot be accessed again.
-        </p>
-        <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
-        <p style="color: #9ca3af; font-size: 12px;">
-          LINKONCE - Zero-knowledge one-time access system
+/**
+ * Email: Link sekali pakai dibuat
+ */
+const kirimLinkSekaliPakai = async ({ to, shareUrl }) => {
+  const html = `
+  <!DOCTYPE html>
+  <html lang="id">
+  <body style="margin:0;padding:24px;background:#f3f4f6;font-family:Arial">
+    <div style="max-width:600px;margin:auto;background:#ffffff;border-radius:8px;padding:24px">
+      <h2 style="margin-top:0;color:#111827">🔐 SakaliSe</h2>
+      <p>Link rahasia ini hanya dapat dibuka <strong>sekali</strong>.</p>
+      <p>
+        <a href="${shareUrl}" style="color:#2563eb;word-break:break-all">
+          ${shareUrl}
+        </a>
+      </p>
+      <p style="font-size:12px;color:#6b7280">
+        Setelah dibuka, link akan otomatis dinonaktifkan demi keamanan.
+      </p>
+    </div>
+  </body>
+  </html>
+  `;
+
+  return sendEmail({
+    to,
+    subject: '🔐 SakaliSe — One-Time Secret Link',
+    html
+  });
+};
+
+/**
+ * Email: Notifikasi link diakses
+ */
+const kirimNotifikasiAkses = async ({
+  to,
+  judul,
+  token,
+  waktu_diakses,
+  ip_address
+}) => {
+  const html = `
+  <!DOCTYPE html>
+  <html lang="id">
+  <body style="margin:0;padding:24px;background:#f3f4f6;font-family:Arial">
+    <div style="max-width:600px;margin:auto;background:#ffffff;border-radius:10px;overflow:hidden">
+      
+      <div style="background:#111827;padding:20px;color:#ffffff">
+        <h2 style="margin:0">SakaliSe</h2>
+        <p style="margin:4px 0 0;font-size:13px;color:#9ca3af">
+          Notifikasi Akses Link
         </p>
       </div>
-    `;
 
-    await this.sendEmail({
-      to,
-      subject: `🔔 Link Accessed: ${judul}`,
-      html
-    });
-  } catch (error) {
-    console.error('Notification email failed:', error);
-  }
+      <div style="padding:24px">
+        <div style="background:#fee2e2;border-left:4px solid #ef4444;padding:14px">
+          <strong>🔥 Link telah diakses</strong> dan dinonaktifkan
+        </div>
+
+        <table width="100%" style="margin-top:20px;border-collapse:collapse">
+          <tr>
+            <td style="padding:10px;color:#6b7280">Judul</td>
+            <td style="padding:10px">${judul}</td>
+          </tr>
+          <tr>
+            <td style="padding:10px;color:#6b7280">Token</td>
+            <td style="padding:10px">${token.slice(0, 12)}…</td>
+          </tr>
+          <tr>
+            <td style="padding:10px;color:#6b7280">Waktu Akses</td>
+            <td style="padding:10px">
+              ${new Date(waktu_diakses).toLocaleString('id-ID')}
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:10px;color:#6b7280">IP Address</td>
+            <td style="padding:10px">${ip_address}</td>
+          </tr>
+        </table>
+
+        <p style="margin-top:20px;font-size:12px;color:#6b7280">
+          Demi keamanan, konten tidak dapat diakses kembali.
+        </p>
+      </div>
+
+    </div>
+  </body>
+  </html>
+  `;
+
+  return sendEmail({
+    to,
+    subject: `Link diakses: ${judul}`,
+    html
+  });
+};
+
+module.exports = {
+  kirimLinkSekaliPakai,
+  kirimNotifikasiAkses
 };

@@ -1,117 +1,117 @@
-// ==============================
-// view.js — FINAL (STABLE)
-// ==============================
+const socket = io({ autoConnect: false });
 
-const socket = io();
-let socketId = null;
-
-const params = new URLSearchParams(window.location.search);
+const params = new URLSearchParams(location.search);
 const token = params.get('token');
 
-const loading = document.getElementById('loading');
-const warning = document.getElementById('warning');
-const content = document.getElementById('content');
-const errorBox = document.getElementById('error');
+const confirmBox = document.getElementById('confirm');
+const contentBox = document.getElementById('content');
+const burnedBox = document.getElementById('burned');
 
-const judulPreview = document.getElementById('judulPreview');
-const judulKonten = document.getElementById('judulKonten');
-const isiKonten = document.getElementById('isiKonten');
+const openBtn = document.getElementById('openBtn');
+const judulEl = document.getElementById('judul');
+const isiEl = document.getElementById('isi');
 const filesBox = document.getElementById('files');
-const revealBtn = document.getElementById('revealBtn');
 
+let opened = false;
+let burned = false;
+
+/* ===============================
+   VALIDASI TOKEN
+================================ */
 if (!token) {
-  errorBox.textContent = 'Token tidak ditemukan';
+  showBurned();
   throw new Error('Token missing');
 }
 
-/* ==============================
-   SOCKET.IO
+/* ===============================
+   SOCKET
 ================================ */
 socket.on('connect', () => {
-  socketId = socket.id;          // ✅ AMBIL ID DI SINI
   socket.emit('join-link', token);
 });
 
 socket.on('burn', () => {
-  document.body.innerHTML = `
-    <h2 style="color:red">Link ini sudah dibuka di tab lain</h2>
-  `;
+  if (!opened) {
+    showBurned();
+  }
 });
 
-/* ==============================
-   CHECK LINK (PREVIEW)
+/* ===============================
+   BUTTON OPEN
 ================================ */
-fetch(`/api/links/${token}/check`)
-  .then(res => res.json())
-  .then(result => {
-    loading.style.display = 'none';
-
-    if (!result.valid) {
-      errorBox.textContent = 'Link tidak valid atau sudah digunakan';
-      return;
-    }
-
-    judulPreview.textContent = result.data.judul || 'Secret Content';
-    warning.style.display = 'block';
-  })
-  .catch(() => {
-    errorBox.textContent = 'Gagal menghubungi server';
-  });
-
-/* ==============================
-   REVEAL CONTENT (ONCE)
-================================ */
-revealBtn.onclick = async () => {
-  if (!socketId) {
-    errorBox.textContent = 'Socket belum siap, coba ulangi';
-    return;
-  }
+openBtn.addEventListener('click', async () => {
+  if (opened || burned) return;
+  opened = true;
 
   try {
     const res = await fetch(
-      `/api/links/${token}?socketId=${socketId}`
+      `/api/links/${token}?socketId=${socket.id}`
     );
-    const result = await res.json();
+    const json = await res.json();
 
-    if (!result.success) {
-      errorBox.textContent = 'Link sudah digunakan';
+    if (!json.success) {
+      showBurned();
       return;
     }
 
-    warning.style.display = 'none';
-    content.style.display = 'block';
-
-    judulKonten.textContent = result.data.judul || '';
-    isiKonten.textContent = result.data.isi_konten || '';
-
-    filesBox.innerHTML = '';
-
-    (result.data.files || []).forEach(file => {
-      if (!file.signedUrl) return;
-
-      if (file.mime.startsWith('image/')) {
-        filesBox.innerHTML += `<img src="${file.signedUrl}">`;
-      }
-
-      if (file.mime.startsWith('video/')) {
-        filesBox.innerHTML += `
-          <video controls>
-            <source src="${file.signedUrl}" type="${file.mime}">
-          </video>
-        `;
-      }
-
-      if (file.mime.startsWith('audio/')) {
-        filesBox.innerHTML += `
-          <audio controls>
-            <source src="${file.signedUrl}" type="${file.mime}">
-          </audio>
-        `;
-      }
-    });
+    renderContent(json.data);
 
   } catch (err) {
     console.error(err);
-    errorBox.textContent = 'Gagal menghubungi server';
+    showBurned();
   }
-};
+});
+
+/* ===============================
+   RENDER CONTENT
+================================ */
+function renderContent(data) {
+  confirmBox.style.display = 'none';
+  burnedBox.style.display = 'none';
+  contentBox.style.display = 'block';
+
+  judulEl.textContent = data.judul;
+  isiEl.textContent = data.isi_konten || '';
+  filesBox.innerHTML = '';
+
+  (data.files || []).forEach(file => {
+    if (file.mime.startsWith('image/')) {
+      const img = document.createElement('img');
+      img.src = file.signedUrl;
+      img.className = 'media-img';
+      filesBox.appendChild(img);
+      return;
+    }
+
+    if (file.mime.startsWith('video/')) {
+      const video = document.createElement('video');
+      video.src = file.signedUrl;
+      video.controls = true;
+      video.className = 'media-video';
+      filesBox.appendChild(video);
+      return;
+    }
+
+    const a = document.createElement('a');
+    a.href = file.signedUrl;
+    a.textContent = `${file.name}`;
+    a.target = '_blank';
+    a.className = 'file-link';
+    filesBox.appendChild(a);
+  });
+}
+
+/* ===============================
+   BURN UI
+================================ */
+function showBurned() {
+  burned = true;
+  confirmBox.style.display = 'none';
+  contentBox.style.display = 'none';
+  burnedBox.style.display = 'block';
+}
+
+/* ===============================
+   START
+================================ */
+socket.connect();

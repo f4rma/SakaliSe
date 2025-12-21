@@ -1,15 +1,13 @@
 const supabase = require('../supabase/client');
 const { generateToken } = require('../src/utils/generateToken');
 
-/* ==============================
-   CREATE LINK
-================================ */
+//  Buat Link
 exports.createLink = async (req, res, next) => {
   try {
     const { judul, isi_konten } = req.body;
 
     if (!isi_konten || !isi_konten.trim()) {
-      const err = new Error('Isi konten wajib');
+      const err = new Error('Isi konten harus diisi');
       err.statusCode = 400;
       throw err;
     }
@@ -20,7 +18,7 @@ exports.createLink = async (req, res, next) => {
       .from('links')
       .insert({
         token,
-        judul: judul || 'Secret Content',
+        judul: judul || 'Konten Rahasia',
         isi_konten,
         status: 'AKTIF'
       });
@@ -35,14 +33,12 @@ exports.createLink = async (req, res, next) => {
     });
 
   } catch (err) {
-    next(err); // ⬅️ lempar ke errorHandler
+    next(err); // lempar ke errorHandler
   }
 };
 
 
-/* ==============================
-   CHECK LINK (AMAN, TANPA BURN)
-================================ */
+//   Cek link (disini aman, tanpa burn)
 exports.checkLink = async (req, res, next) => {
   try {
     const { token } = req.params;
@@ -70,15 +66,13 @@ exports.checkLink = async (req, res, next) => {
 };
 
 
-/* ==============================
-   ACCESS LINK (SEKALI PAKAI)
-   ⬅️ SOCKET.IO EMIT DI SINI
-================================ */
+//   Akses link, socket.IO emit disini
+   
 exports.accessLink = async (req, res, next) => {
   try {
     const { token } = req.params;
 
-    // Update status → TERPAKAI (atomic)
+    // Update status → TERPAKAI (bersifat atomic)
     const { data, error } = await supabase
       .from('links')
       .update({
@@ -91,12 +85,12 @@ exports.accessLink = async (req, res, next) => {
       .maybeSingle();
 
     if (error || !data) {
-      const err = new Error('Link invalid / sudah diakses');
+      const err = new Error('Link tidak valid atau sudah diakses');
       err.statusCode = 410;
       throw err;
     }
 
-    //  SOCKET.IO EMIT (INI INTINYA)
+    //  Emit Socket.IO (inti mekanisme burn)
     const io = req.app.get('io');
     io.to(token).emit('burn');
 

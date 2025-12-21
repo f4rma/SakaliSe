@@ -8,15 +8,13 @@ const supabase = require('./config/database');
 const { generateToken } = require('./src/utils/generateToken');
 const { isAllowedFile } = require('./src/utils/fileValidator');
 const {
-  sendEmail,
-  sendAccessNotification
+  kirimLinkSekaliPakai,
+  kirimNotifikasiAkses
 } = require('./src/utils/emailService');
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
-
-app.set('io', io);
 
 const PORT = process.env.PORT || 3000;
 
@@ -28,7 +26,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
 /* ===============================
-   MULTER (MEMORY)
+   MULTER (MEMORY STORAGE)
 ================================ */
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -62,7 +60,7 @@ app.post('/api/links', upload.array('files'), async (req, res) => {
     const token = generateToken();
     const uploadedFiles = [];
 
-    /* ===== Upload files to Supabase ===== */
+    /* ===== Upload files ===== */
     for (const file of files) {
       if (!isAllowedFile(file.mimetype)) {
         return res.status(400).json({
@@ -99,23 +97,11 @@ app.post('/api/links', upload.array('files'), async (req, res) => {
 
     const shareUrl = `${process.env.BASE_URL}/view.html?token=${token}`;
 
-    /* ===== OPTIONAL: send link via email ===== */
+    /* ===== Send email (optional) ===== */
     if (email) {
-      await sendEmail({
+      await kirimLinkSekaliPakai({
         to: email,
-        subject: '🔐 SakaliSe — One-Time Secret Link',
-        html: `
-          <div style="font-family:Arial;max-width:600px;margin:auto">
-            <h2>Secret Link Generated</h2>
-            <p>This link can be opened <b>only once</b>.</p>
-            <p>
-              <a href="${shareUrl}">${shareUrl}</a>
-            </p>
-            <p style="color:#666;font-size:12px">
-              After first access, this link will be permanently destroyed.
-            </p>
-          </div>
-        `
+        shareUrl
       });
     }
 
@@ -156,33 +142,38 @@ app.get('/api/links/:token/check', async (req, res) => {
 });
 
 /* ===============================
-   ACCESS LINK (ONCE)
+   ACCESS LINK (ONCE) — FIXED
 ================================ */
 app.get('/api/links/:token', async (req, res) => {
   const { token } = req.params;
   const { socketId } = req.query;
 
-  const { data } = await supabase
+  /* ===== 1. Fetch link safely ===== */
+  const { data, error } = await supabase
+    .from('links')
+    .select('*')
+    .eq('token', token)
+    .maybeSingle();
+
+  if (!data || data.status !== 'AKTIF') {
+    return res.json({ success: false });
+  }
+
+  /* ===== 2. Mark as used ===== */
+  await supabase
     .from('links')
     .update({
       status: 'TERPAKAI',
       accessed_at: new Date().toISOString()
     })
-    .eq('token', token)
-    .eq('status', 'AKTIF')
-    .select()
-    .maybeSingle();
+    .eq('token', token);
 
-  if (!data) {
-    return res.json({ success: false });
-  }
-
-  /* ===== Burn other tabs ===== */
+  /* ===== 3. Burn other tabs ===== */
   if (socketId) {
     io.to(token).except(socketId).emit('burn');
   }
 
-  /* ===== Signed URLs ===== */
+  /* ===== 4. Signed URLs ===== */
   const signedFiles = [];
   for (const file of data.files || []) {
     const { data: url } = await supabase.storage
@@ -195,17 +186,18 @@ app.get('/api/links/:token', async (req, res) => {
     });
   }
 
-  /* ===== Access notification email ===== */
+  /* ===== 5. Access notification ===== */
   if (process.env.ADMIN_EMAIL) {
-    await sendAccessNotification({
+    await kirimNotifikasiAkses({
       to: process.env.ADMIN_EMAIL,
       judul: data.judul,
       token,
-      waktu_diakses: data.accessed_at,
+      waktu_diakses: new Date().toISOString(),
       ip_address: req.ip
     });
   }
 
+  /* ===== 6. Response ===== */
   res.json({
     success: true,
     data: {

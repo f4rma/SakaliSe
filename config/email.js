@@ -1,6 +1,6 @@
 const nodemailer = require('nodemailer');
 
-const transporter = nodemailer.createTransport({
+const pengirimEmail = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
   port: process.env.SMTP_PORT,
   secure: process.env.SMTP_SECURE === 'true',
@@ -10,13 +10,13 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// Verify connection
-transporter.verify((error, success) => {
+// Verif koneksi SMTP
+pengirimEmail.verify((error) => {
   if (error) {
-    console.error('SMTP connection error:', error);
+    console.error('Kesalahan koneksi SMTP:', error);
   } else {
-    console.log('SMTP server ready to send emails');
+    console.log('Server SMTP siap mengirim email');
   }
 });
 
-module.exports = transporter;
+module.exports = pengirimEmail;

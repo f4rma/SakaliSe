@@ -1,27 +1,27 @@
 module.exports = (err, req, res, next) => {
-  console.error('Error:', err);
+  console.error('Terjadi kesalahan:', err);
 
-  // Mongoose validation error
+  // validasi error
   if (err.name === 'ValidationError') {
     return res.status(400).json({
       success: false,
-      message: 'Validation error',
+      message: 'Kesalahan validasi data',
       errors: Object.values(err.errors).map(e => e.message)
     });
   }
 
-  // Mongoose duplicate key error
-  if (err.code === 11000) {
+  // error duplikasi data
+  if (err.code === 23505) {
     return res.status(400).json({
       success: false,
-      message: 'Duplicate entry',
+      message: 'Data sudah ada',
       field: Object.keys(err.keyPattern)[0]
     });
   }
 
-  // Default error
+  // error default
   res.status(err.statusCode || 500).json({
     success: false,
-    message: err.message || 'Internal server error'
+    message: err.message || 'Terjadi kesalahan pada server'
   });
 };

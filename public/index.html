@@ -1,85 +1,98 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <title>SakaliSe</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SakaliSe — Compose Secret Package</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            neon: '#22c55e'
-          }
-        }
-      }
-    }
-  </script>
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/style.css" />
+
 </head>
+<body>
 
-<body class="min-h-screen bg-black text-white flex items-center justify-center">
+  <!-- HEADER -->
+  <header class="topbar">
+    <div class="brand">🔐 SakaliSe</div>
 
-  <!-- Background -->
-  <div class="absolute inset-0 bg-gradient-to-br from-green-900/20 via-black to-black"></div>
-
-  <!-- Card -->
-  <div class="relative z-10 w-full max-w-2xl bg-zinc-900/80 backdrop-blur-xl rounded-2xl shadow-2xl p-8">
-
-    <h1 class="text-3xl font-bold mb-1">Create Secret Transmission</h1>
-    <p class="text-gray-400 mb-6">
-      Secure your message. It will vanish after one glance.
-    </p>
-
-    <!-- Tabs -->
-    <div class="flex gap-2 mb-4">
-      <button class="tab-btn bg-white text-black px-4 py-1 rounded-full text-sm font-semibold" data-type="text">TEXT</button>
-      <button class="tab-btn bg-zinc-800 px-4 py-1 rounded-full text-sm" data-type="image">IMAGE</button>
-      <button class="tab-btn bg-zinc-800 px-4 py-1 rounded-full text-sm" data-type="audio">AUDIO</button>
-      <button class="tab-btn bg-zinc-800 px-4 py-1 rounded-full text-sm" data-type="video">VIDEO</button>
+    <div class="top-actions">
+      <button id="toggleTheme" title="Toggle theme">🌓</button>
     </div>
+  </header>
 
-    <!-- Form -->
-    <form id="form" class="space-y-4">
+  <!-- MAIN -->
+  <main class="container">
+    <div class="card">
 
-      <textarea
-        id="isi_konten"
-        class="w-full h-40 p-4 bg-black/60 rounded-xl outline-none resize-none"
-        placeholder="Type your secret message here..."
-      ></textarea>
+      <h1>Compose Secret Package</h1>
+      <p class="subtitle">
+        Add text and optional media. Everything vanishes once viewed.
+      </p>
 
-      <input id="files" type="file" multiple class="hidden" />
+      <form id="form">
 
-      <input
-        id="email"
-        type="email"
-        placeholder="recipient@example.com (optional)"
-        class="w-full p-3 bg-black/60 rounded-xl outline-none"
-      />
+        <!-- MESSAGE -->
+        <label>Secret Message</label>
+        <textarea
+          name="isi_konten"
+          placeholder="Type your sensitive information here..."
+        ></textarea>
 
-      <button
-        type="submit"
-        class="w-full bg-neon hover:bg-green-500 text-black font-bold py-4 rounded-xl tracking-widest transition"
-      >
-        GENERATE SECRET LINK
-      </button>
-    </form>
+        <!-- ATTACH MEDIA -->
+        <label style="margin-top:20px">Media Attachment (Optional)</label>
 
-    <!-- Result -->
-    <div id="result" class="hidden mt-6 border-t border-zinc-700 pt-6 space-y-4">
-      <h2 class="text-xl font-semibold">Secret Link Generated</h2>
+        <div id="dropzone" class="dropzone">
+          <input
+            type="file"
+            id="files"
+            name="files"
+            multiple
+            hidden
+          />
 
-      <div class="flex items-center gap-2 bg-black/70 p-3 rounded-lg">
-        <input id="resultLink" readonly class="flex-1 bg-transparent outline-none text-sm" />
-        <button id="copyBtn" class="text-neon text-sm">COPY</button>
+          <div class="dz-inner">
+            <div class="dz-plus">+</div>
+            <p>Attach Media</p>
+            <small>Click or drag files here</small>
+          </div>
+        </div>
+
+        <div id="fileList" class="file-list"></div>
+
+        <!-- EMAIL -->
+        <label style="margin-top:20px">Dispatch via Email (optional)</label>
+        <input
+          type="email"
+          name="email"
+          placeholder="recipient@example.com"
+        />
+
+        <!-- SUBMIT -->
+        <button type="submit" class="lock-btn">
+          LOCK AND ENCRYPT
+        </button>
+      </form>
+    </div>
+  </main>
+
+  <!-- RESULT MODAL -->
+  <div id="modal" class="modal hidden">
+    <div class="modal-card">
+      <div class="check">✔</div>
+      <h2>Package Ready</h2>
+      <p class="muted">
+        Transmission encapsulated. Link will expire after first access.
+      </p>
+
+      <div class="link-box">
+        <input id="resultLink" readonly />
+        <button id="copyBtn">Copy</button>
       </div>
 
-      <p class="text-gray-400 text-sm">
-        This link can only be viewed once. After first access, it is destroyed.
-      </p>
+      <button id="closeModal" class="secondary">
+        Create New Package
+      </button>
     </div>
-
   </div>
 
   <script src="/js/app.js"></script>
