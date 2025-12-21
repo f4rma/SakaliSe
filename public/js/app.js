@@ -1,152 +1,73 @@
-// Socket.io connection
-const socket = io();
+const form = document.getElementById('form');
+const isiKonten = document.getElementById('isi_konten');
+const filesInput = document.getElementById('files');
+const emailInput = document.getElementById('email');
 
-// DOM elements
-const linkForm = document.getElementById('linkForm');
-const resultContainer = document.getElementById('resultContainer');
-const isiKontenTextarea = document.getElementById('isi_konten');
-const charCount = document.querySelector('.char-count');
-const submitBtn = document.getElementById('submitBtn');
+const resultBox = document.getElementById('result');
+const resultLink = document.getElementById('resultLink');
 const copyBtn = document.getElementById('copyBtn');
-const createAnotherBtn = document.getElementById('createAnother');
 
-// Character counter
-isiKontenTextarea.addEventListener('input', (e) => {
-  charCount.textContent = `${e.target.value.length} chars`;
-});
+let activeType = 'text';
 
-// Form submission
-linkForm.addEventListener('submit', async (e) => {
-  e.preventDefault();
-
-  // Disable button
-  submitBtn.disabled = true;
-  submitBtn.textContent = 'Creating Link...';
-
-  const formData = {
-    judul: document.getElementById('judul').value || 'Secret Message',
-    jenis_konten: document.getElementById('jenis_konten').value,
-    isi_konten: document.getElementById('isi_konten').value,
-    email_pengirim: document.getElementById('email_pengirim').value,
-    email_penerima: document.getElementById('email_penerima').value || null
-  };
-
-  try {
-    const response = await fetch('/api/links', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(formData)
+/* =========================
+   TAB HANDLER
+========================= */
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => {
+      b.classList.remove('bg-white', 'text-black');
+      b.classList.add('bg-zinc-800');
     });
 
-    const result = await response.json();
+    btn.classList.add('bg-white', 'text-black');
+    btn.classList.remove('bg-zinc-800');
 
-    if (result.success) {
-      // Show result
-      linkForm.classList.add('hidden');
-      resultContainer.classList.remove('hidden');
+    activeType = btn.dataset.type;
+    filesInput.classList.toggle('hidden', activeType === 'text');
+  });
+});
 
-      // Fill in data
-      document.getElementById('generatedLink').value = result.data.shareUrl;
-      
-      const expiryDate = new Date(result.data.expires);
-      const hoursUntilExpiry = Math.round((expiryDate - new Date()) / (1000 * 60 * 60));
-      document.getElementById('expiryTime').textContent = `${hoursUntilExpiry} hours`;
-      document.getElementById('emailStatus').textContent = result.data.emailSent ? 'Yes ✅' : 'No';
+/* =========================
+   SUBMIT
+========================= */
+form.addEventListener('submit', async e => {
+  e.preventDefault();
 
-      // Show success notification
-      showNotification('Link created successfully! 🎉', 'success');
-    } else {
-      showNotification(result.message || 'Failed to create link', 'error');
+  const formData = new FormData();
+  formData.append('isi_konten', isiKonten.value);
+  formData.append('email', emailInput.value);
+
+  for (const file of filesInput.files) {
+    formData.append('files', file);
+  }
+
+  try {
+    const res = await fetch('/api/links', {
+      method: 'POST',
+      body: formData
+    });
+
+    const data = await res.json();
+
+    if (!data.success) {
+      alert(data.message || 'Failed to create link');
+      return;
     }
-  } catch (error) {
-    console.error('Error:', error);
-    showNotification('Network error. Please try again.', 'error');
-  } finally {
-    submitBtn.disabled = false;
-    submitBtn.textContent = 'Create Secret Link';
+
+    resultBox.classList.remove('hidden');
+    resultLink.value = data.data.shareUrl;
+
+  } catch (err) {
+    console.error(err);
+    alert('Server error');
   }
 });
 
-// Copy button
+/* =========================
+   COPY
+========================= */
 copyBtn.addEventListener('click', () => {
-  const linkInput = document.getElementById('generatedLink');
-  linkInput.select();
-  document.execCommand('copy');
-  
-  copyBtn.textContent = 'Copied! ✓';
-  setTimeout(() => {
-    copyBtn.textContent = 'Copy';
-  }, 2000);
+  navigator.clipboard.writeText(resultLink.value);
+  copyBtn.textContent = 'COPIED';
+  setTimeout(() => (copyBtn.textContent = 'COPY'), 1500);
 });
-
-// Create another link
-createAnotherBtn.addEventListener('click', () => {
-  linkForm.reset();
-  linkForm.classList.remove('hidden');
-  resultContainer.classList.add('hidden');
-  charCount.textContent = '0 chars';
-});
-
-// Socket.io: Listen for link access notifications
-socket.on('link-accessed', (data) => {
-  showNotification(`Your link "${data.judul}" was just accessed!`, 'info');
-});
-
-// Notification system
-function showNotification(message, type = 'info') {
-  const notification = document.createElement('div');
-  notification.className = `notification notification-${type}`;
-  notification.textContent = message;
-  
-  notification.style.cssText = `
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    padding: 16px 24px;
-    background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
-    color: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    z-index: 1000;
-    animation: slideInRight 0.3s;
-    max-width: 300px;
-  `;
-  
-  document.body.appendChild(notification);
-  
-  setTimeout(() => {
-    notification.style.animation = 'slideOutRight 0.3s';
-    setTimeout(() => {
-      document.body.removeChild(notification);
-    }, 300);
-  }, 4000);
-}
-
-// Add CSS animations
-const style = document.createElement('style');
-style.textContent = `
-  @keyframes slideInRight {
-    from {
-      transform: translateX(400px);
-      opacity: 0;
-    }
-    to {
-      transform: translateX(0);
-      opacity: 1;
-    }
-  }
-  
-  @keyframes slideOutRight {
-    from {
-      transform: translateX(0);
-      opacity: 1;
-    }
-    to {
-      transform: translateX(400px);
-      opacity: 0;
-    }
-  }
-`;
-document.head.appendChild(style);
