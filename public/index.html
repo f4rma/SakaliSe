@@ -1,108 +1,87 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <title>SakaliSe</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LINKONCE - Share a Secret that Self-Destructs</title>
-  <link rel="stylesheet" href="/css/style.css">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            neon: '#22c55e'
+          }
+        }
+      }
+    }
+  </script>
 </head>
-<body>
-  <div class="container">
-    <header>
-      <div class="logo">
-        <h1>SakaliSe</h1>
+
+<body class="min-h-screen bg-black text-white flex items-center justify-center">
+
+  <!-- Background -->
+  <div class="absolute inset-0 bg-gradient-to-br from-green-900/20 via-black to-black"></div>
+
+  <!-- Card -->
+  <div class="relative z-10 w-full max-w-2xl bg-zinc-900/80 backdrop-blur-xl rounded-2xl shadow-2xl p-8">
+
+    <h1 class="text-3xl font-bold mb-1">Create Secret Transmission</h1>
+    <p class="text-gray-400 mb-6">
+      Secure your message. It will vanish after one glance.
+    </p>
+
+    <!-- Tabs -->
+    <div class="flex gap-2 mb-4">
+      <button class="tab-btn bg-white text-black px-4 py-1 rounded-full text-sm font-semibold" data-type="text">TEXT</button>
+      <button class="tab-btn bg-zinc-800 px-4 py-1 rounded-full text-sm" data-type="image">IMAGE</button>
+      <button class="tab-btn bg-zinc-800 px-4 py-1 rounded-full text-sm" data-type="audio">AUDIO</button>
+      <button class="tab-btn bg-zinc-800 px-4 py-1 rounded-full text-sm" data-type="video">VIDEO</button>
+    </div>
+
+    <!-- Form -->
+    <form id="form" class="space-y-4">
+
+      <textarea
+        id="isi_konten"
+        class="w-full h-40 p-4 bg-black/60 rounded-xl outline-none resize-none"
+        placeholder="Type your secret message here..."
+      ></textarea>
+
+      <input id="files" type="file" multiple class="hidden" />
+
+      <input
+        id="email"
+        type="email"
+        placeholder="recipient@example.com (optional)"
+        class="w-full p-3 bg-black/60 rounded-xl outline-none"
+      />
+
+      <button
+        type="submit"
+        class="w-full bg-neon hover:bg-green-500 text-black font-bold py-4 rounded-xl tracking-widest transition"
+      >
+        GENERATE SECRET LINK
+      </button>
+    </form>
+
+    <!-- Result -->
+    <div id="result" class="hidden mt-6 border-t border-zinc-700 pt-6 space-y-4">
+      <h2 class="text-xl font-semibold">Secret Link Generated</h2>
+
+      <div class="flex items-center gap-2 bg-black/70 p-3 rounded-lg">
+        <input id="resultLink" readonly class="flex-1 bg-transparent outline-none text-sm" />
+        <button id="copyBtn" class="text-neon text-sm">COPY</button>
       </div>
-    </header>
 
-    <main>
-      <div class="hero">
-        <h2>Share a secret<br><span class="highlight">that self-destructs.</span></h2>
-        <p class="subtitle">Paste your password, private key, or sensitive message below. We'll generate a secure link that works <strong>exactly once.</strong></p>
-      </div>
+      <p class="text-gray-400 text-sm">
+        This link can only be viewed once. After first access, it is destroyed.
+      </p>
+    </div>
 
-      <div class="form-container">
-        <form id="linkForm">
-          <div class="form-group">
-            <label for="judul">Title (Optional)</label>
-            <input type="text" id="judul" placeholder="e.g., Secret Password, API Key...">
-          </div>
-
-          <div class="form-group">
-            <label for="jenis_konten">Content Type</label>
-            <select id="jenis_konten" required>
-              <option value="text">Text Message</option>
-              <option value="password">Password</option>
-              <option value="url">URL/Link</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label for="isi_konten">Your Secret Message</label>
-            <textarea id="isi_konten" rows="6" placeholder="e.g., SuperSecretPassword123! or API Token..." required></textarea>
-            <span class="char-count">0 chars</span>
-          </div>
-
-          <div class="form-group">
-            <label for="email_pengirim">Your Email (for notifications) *</label>
-            <input type="email" id="email_pengirim" placeholder="you@example.com" required>
-          </div>
-
-          <div class="form-group">
-            <label for="email_penerima">Recipient Email (Optional)</label>
-            <input type="email" id="email_penerima" placeholder="recipient@example.com">
-            <small>If provided, we'll send the link directly to this email</small>
-          </div>
-
-          <div class="form-group checkbox-group">
-            <label>
-              <input type="checkbox" id="burn_after_reading" checked disabled>
-              <span class="fire-icon">🔥</span> Burns after reading
-            </label>
-          </div>
-
-          <button type="submit" class="btn-primary" id="submitBtn">
-            Create Secret Link
-          </button>
-        </form>
-
-        <div id="resultContainer" class="result-container hidden">
-          <div class="success-message">
-            <span class="check-icon">✅</span>
-            <h3>Link Created Successfully!</h3>
-          </div>
-
-          <div class="link-box">
-            <input type="text" id="generatedLink" readonly>
-            <button class="btn-copy" id="copyBtn">Copy</button>
-          </div>
-
-          <div class="warning-box">
-            <p>⚠️ <strong>Important:</strong> This link can only be used <strong>once</strong>. After it's opened, the content will be permanently destroyed.</p>
-          </div>
-
-          <div class="stats">
-            <div class="stat-item">
-              <span class="stat-label">Expires in:</span>
-              <span class="stat-value" id="expiryTime">24 hours</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-label">Email sent:</span>
-              <span class="stat-value" id="emailStatus">No</span>
-            </div>
-          </div>
-
-          <button class="btn-secondary" id="createAnother">Create Another Link</button>
-        </div>
-      </div>
-    </main>
-
-    <footer>
-      <p>© 2025 LINKONCE. Zero-knowledge one-time access system.</p>
-      <p><a href="#">Privacy</a> · <a href="#">Terms</a></p>
-    </footer>
   </div>
 
-  <script src="/socket.io/socket.io.js"></script>
   <script src="/js/app.js"></script>
 </body>
 </html>

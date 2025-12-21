@@ -1,89 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <title>SakaliSe – View</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Web View Secret - SakaliSe</title>
-  <link rel="stylesheet" href="/css/style.css">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/socket.io/socket.io.js"></script>
 </head>
-<body>
-  <div class="container">
-    <header>
-      <div class="logo">
-        <h1>SakaliSe</h1>
-      </div>
-    </header>
 
-    <main>
-      <div id="loadingState" class="loading-state">
-        <div class="spinner"></div>
-        <p>Verifikasi link...</p>
-      </div>
+<body class="min-h-screen bg-black text-white flex items-center justify-center">
 
-      <div id="warningState" class="warning-state hidden">
-        <h2>Peringatan: Hanya sekali akses</h2>
-        <p>Konten ini hanya dapat diakses <strong>sekali</strong>.</p>
-        <p>Setelah Anda mengklik tombol di bawah ini, link tersebut akan dihapus secara permanen.</p>
-        
-        <div class="link-info">
-          <div class="info-item">
-            <span class="label">Title:</span>
-            <span class="value" id="previewJudul">-</span>
-          </div>
-          <div class="info-item">
-            <span class="label">Type:</span>
-            <span class="value" id="previewJenis">-</span>
-          </div>
-          <div class="info-item">
-            <span class="label">Expires:</span>
-            <span class="value" id="previewExpiry">-</span>
-          </div>
-        </div>
+  <div class="w-full max-w-2xl bg-zinc-900/80 backdrop-blur-xl rounded-2xl p-8 shadow-2xl">
 
-        <button class="btn-danger" id="revealBtn">
-          Tampilkan Konten
-        </button>
-      </div>
+    <h2 id="judulPreview" class="text-2xl font-bold mb-4"></h2>
 
-      <div id="contentState" class="content-state hidden">
-        <div class="success-icon">✅</div>
-        <h2 id="contentJudul">Pesan Rahasia</h2>
-        
-        <div class="content-box">
-          <div class="content-header">
-            <span id="contentType">Teks</span>
-            <button class="btn-copy-small" id="copyContent">Salin</button>
-          </div>
-          <div class="content-body" id="contentBody"></div>
-        </div>
+    <div id="loading" class="text-gray-400">Loading...</div>
 
-        <div class="destruction-notice">
-          <p>Konten ini telah diakses dan tautannya kini telah<strong>dihapus permanen</strong>.</p>
-          <p class="timestamp">Accessed at: <span id="accessTime"></span></p>
-        </div>
-      </div>
+    <div id="warning" class="hidden space-y-4">
+      <p class="text-yellow-400">⚠️ This content can only be opened once.</p>
+      <button
+        id="revealBtn"
+        class="w-full bg-neon hover:bg-green-500 text-black py-3 rounded-xl font-bold"
+      >
+        OPEN CONTENT
+      </button>
+    </div>
 
-      <div id="errorState" class="error-state hidden">
-        <div class="error-icon">❌</div>
-        <h2>Link Not Available</h2>
-        <p id="errorMessage">Tautan ini sudah tidak tersedia lagi..</p>
-        
-        <div class="error-reasons">
-          <h3>Possible reasons:</h3>
-          <ul>
-            <li>✓ Tautan sudah pernah diakses</li>
-            <li>✓ Tautan sudah kadaluarsa</li>
-            <li>✓ Tautan tidak valid</li>
-          </ul>
-        </div>
+    <div id="content" class="hidden space-y-4">
+      <h3 id="judulKonten" class="text-xl font-semibold"></h3>
+      <p id="isiKonten" class="whitespace-pre-wrap"></p>
+      <div id="files" class="space-y-4"></div>
+    </div>
 
-        <a href="/" class="btn-secondary">Buat link baru</a>
-      </div>
-    </main>
+    <div id="error" class="text-red-500 mt-4"></div>
 
-    <footer>
-      <p>© 2025 LINKONCE. Zero-knowledge one-time access system.</p>
-    </footer>
   </div>
 
   <script src="/js/view.js"></script>
