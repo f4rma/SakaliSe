@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <title>SakaliSe — Compose Secret Package</title>
+  <title>SakaliSe</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <!-- CSS -->
@@ -24,22 +24,21 @@
   <main class="container">
     <div class="card">
 
-      <h1>Compose Secret Package</h1>
+      <h1>Konten sekali akses</h1>
       <p class="subtitle">
-        Add text and optional media. Everything vanishes once viewed.
+        Kirim pesan ataupun file. Semua akan hilang setelah diakses.
       </p>
 
       <form id="form">
 
         <!-- MESSAGE -->
-        <label>Secret Message</label>
+        <label>Pesan</label>
         <textarea
           name="isi_konten"
-          placeholder="Type your sensitive information here..."
+          placeholder="Ketik pesan Anda disini..."
         ></textarea>
 
-        <!-- ATTACH MEDIA -->
-        <label style="margin-top:20px">Media Attachment (Optional)</label>
+        <!-- ATTACH MEDIA -->        
 
         <div id="dropzone" class="dropzone">
           <input
@@ -52,24 +51,25 @@
 
           <div class="dz-inner">
             <div class="dz-plus">+</div>
-            <p>Attach Media</p>
-            <small>Click or drag files here</small>
+            <p>Lampirkan Media</p>
+            <small>Klik atau seret file ke sini</small>
+            <small>(Gambar/Audio/Video)</small>
           </div>
         </div>
 
         <div id="fileList" class="file-list"></div>
 
         <!-- EMAIL -->
-        <label style="margin-top:20px">Dispatch via Email (optional)</label>
+        <label style="margin-top:20px">Kirim melalui Email (opsional)</label>
         <input
           type="email"
           name="email"
-          placeholder="recipient@example.com"
+          placeholder="contoh@gmail.com"
         />
 
         <!-- SUBMIT -->
         <button type="submit" class="lock-btn">
-          LOCK AND ENCRYPT
+          Buat Tautan
         </button>
       </form>
     </div>
@@ -79,18 +79,18 @@
   <div id="modal" class="modal hidden">
     <div class="modal-card">
       <div class="check">✔</div>
-      <h2>Package Ready</h2>
+      <h2>Pesan siap dikirim</h2>
       <p class="muted">
-        Transmission encapsulated. Link will expire after first access.
+        Transmisi berhasil. Tautan akan kedaluwarsa setelah diakses.
       </p>
 
       <div class="link-box">
         <input id="resultLink" readonly />
-        <button id="copyBtn">Copy</button>
+        <button id="copyBtn">Salin</button>
       </div>
 
       <button id="closeModal" class="secondary">
-        Create New Package
+        Buat pesan baru
       </button>
     </div>
   </div>
