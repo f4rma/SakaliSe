@@ -99,11 +99,14 @@ app.post('/api/links', upload.array('files'), async (req, res) => {
 
     /* ===== Send email (optional) ===== */
     if (email) {
-      await kirimLinkSekaliPakai({
+      kirimLinkSekaliPakai({
         to: email,
         shareUrl
+      }).catch(err => {
+        console.error('EMAIL ERROR (ignored):', err.message);
       });
     }
+
 
     res.json({
       success: true,
@@ -211,6 +214,6 @@ app.get('/api/links/:token', async (req, res) => {
 /* ===============================
    START SERVER
 ================================ */
-server.listen(PORT, () => {
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`SakaliSe running at http://localhost:${PORT}`);
 });
