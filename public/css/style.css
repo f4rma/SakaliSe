@@ -240,3 +240,135 @@ button.secondary {
   background: #000;
 }
 
+/* ===============================
+   KONTEN RAHASIA (READABLE MODE)
+================================ */
+
+/* Container isi pesan */
+#isi {
+  max-width: 720px;
+  margin: 0 auto 32px;
+  font-size: 15.5px;
+  line-height: 1.85;
+  color: var(--text);
+  white-space: normal;
+}
+
+/* Paragraf otomatis */
+#isi p {
+  margin: 0 0 1.2em;
+}
+
+/* Judul konten (jika ada) */
+#isi h2,
+#isi h3 {
+  margin-top: 1.8em;
+  margin-bottom: 0.6em;
+  font-weight: 600;
+}
+
+/* List (kalau nanti dipakai) */
+#isi ul,
+#isi ol {
+  padding-left: 20px;
+  margin-bottom: 1.2em;
+}
+
+/* Pemisah konten & media */
+#files {
+  margin-top: 36px;
+  display: grid;
+  gap: 20px;
+}
+
+/* File non-media */
+.file-link {
+  display: inline-block;
+  padding: 10px 14px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 10px;
+  color: #9ee7ff;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.file-link:hover {
+  background: rgba(255,255,255,0.12);
+}
+
+/* ===============================
+   THEME SYSTEM
+================================ */
+
+:root[data-theme="dark"] {
+  --bg: #020617;
+  --card: #0f172a;
+  --border: #1f2937;
+  --text: #e5e7eb;
+  --muted: #9ca3af;
+  --primary: #22c55e;
+}
+
+:root[data-theme="light"] {
+  --bg: #f8fafc;
+  --card: #ffffff;
+  --border: #e5e7eb;
+  --text: #020617;
+  --muted: #6b7280;
+  --primary: #16a34a;
+}
+
+/* apply background globally */
+body {
+  background: radial-gradient(circle at top, var(--bg), #000);
+}
+
+/* light mode tweak */
+:root[data-theme="light"] body {
+  background: #f1f5f9;
+}
+
+/* card in light mode */
+:root[data-theme="light"] .card {
+  background: #ffffff;
+  box-shadow: 0 20px 40px rgba(0,0,0,.08);
+}
+
+/* input light mode */
+:root[data-theme="light"] input,
+:root[data-theme="light"] textarea {
+  background: #f8fafc;
+  color: var(--text);
+}
+
+/* Center title & subtitle */
+.card h1,
+.card .subtitle {
+  text-align: center;
+}
+
+input[type="file"] {
+  display: none !important;
+}
+
+.file-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255,255,255,0.05);
+  padding: 10px 14px;
+  border-radius: 10px;
+  margin-top: 8px;
+  font-size: 13px;
+}
+
+.file-item span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 85%;
+}
+
+.file-item small {
+  color: var(--muted);
+}

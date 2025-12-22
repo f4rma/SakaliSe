@@ -71,7 +71,7 @@ function renderContent(data) {
   contentBox.style.display = 'block';
 
   judulEl.textContent = data.judul;
-  isiEl.textContent = data.isi_konten || '';
+  renderTextContent(data.isi_konten);
   filesBox.innerHTML = '';
 
   (data.files || []).forEach(file => {
@@ -98,6 +98,24 @@ function renderContent(data) {
     a.target = '_blank';
     a.className = 'file-link';
     filesBox.appendChild(a);
+  });
+}
+
+function renderTextContent(text) {
+  isiEl.innerHTML = '';
+
+  if (!text) return;
+
+  // Pecah berdasarkan baris kosong
+  const paragraphs = text
+    .split(/\n{2,}/)
+    .map(p => p.trim())
+    .filter(Boolean);
+
+  paragraphs.forEach(p => {
+    const el = document.createElement('p');
+    el.textContent = p;
+    isiEl.appendChild(el);
   });
 }
 

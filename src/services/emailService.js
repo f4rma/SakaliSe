@@ -1,9 +1,7 @@
 // src/utils/emailService.js
-const pengirimEmail = require('../../config/email');
+const pengirimEmail = require('../config/email');
 
-/**
- * Low-level email sender
- */
+// Low-level email sender
 const sendEmail = async ({ to, subject, html }) => {
   try {
     const info = await pengirimEmail.sendMail({
@@ -77,7 +75,7 @@ const kirimNotifikasiAkses = async ({
 
       <div style="padding:24px">
         <div style="background:#fee2e2;border-left:4px solid #ef4444;padding:14px">
-          <strong>🔥 Link telah diakses</strong> dan dinonaktifkan
+          <strong>Link telah diakses</strong> dan dinonaktifkan
         </div>
 
         <table width="100%" style="margin-top:20px;border-collapse:collapse">

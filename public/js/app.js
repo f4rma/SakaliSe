@@ -1,3 +1,6 @@
+/* =========================
+   ELEMENTS
+========================= */
 const form = document.getElementById('form');
 const modal = document.getElementById('modal');
 const resultLink = document.getElementById('resultLink');
@@ -9,7 +12,12 @@ const filesInput = document.getElementById('files');
 const fileList = document.getElementById('fileList');
 
 /* =========================
-   DROPZONE
+   FILE STATE
+========================= */
+let selectedFiles = [];
+
+/* =========================
+   DROPZONE EVENTS
 ========================= */
 dropzone.addEventListener('click', () => filesInput.click());
 
@@ -25,32 +33,89 @@ dropzone.addEventListener('dragleave', () => {
 dropzone.addEventListener('drop', e => {
   e.preventDefault();
   dropzone.classList.remove('active');
-  filesInput.files = e.dataTransfer.files;
-  renderFiles();
+
+  const newFiles = Array.from(e.dataTransfer.files);
+  addFiles(newFiles);
 });
 
-filesInput.addEventListener('change', renderFiles);
+filesInput.addEventListener('change', e => {
+  addFiles(Array.from(e.target.files));
+});
+
+/* =========================
+   FILE HANDLING
+========================= */
+function addFiles(files) {
+  files.forEach(file => {
+    // Cegah duplikat (nama + ukuran)
+    if (!selectedFiles.some(f => f.name === file.name && f.size === file.size)) {
+      selectedFiles.push(file);
+    }
+  });
+
+  syncInputFiles();
+  renderFiles();
+}
+
+function syncInputFiles() {
+  const dt = new DataTransfer();
+  selectedFiles.forEach(file => dt.items.add(file));
+  filesInput.files = dt.files;
+}
 
 function renderFiles() {
   fileList.innerHTML = '';
-  [...filesInput.files].forEach(file => {
+
+  if (selectedFiles.length === 0) return;
+
+  selectedFiles.forEach(file => {
     const div = document.createElement('div');
     div.className = 'file-item';
-    div.textContent = `📎 ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+
+    div.innerHTML = `
+      <span title="${file.name}">${file.name}</span>
+      <small>${(file.size / 1024 / 1024).toFixed(2)} MB</small>
+    `;
+
     fileList.appendChild(div);
   });
 }
 
 /* =========================
-   SUBMIT FORM
+   FORM SUBMIT
 ========================= */
+let isSubmitting = false;
+
 form.addEventListener('submit', async e => {
   e.preventDefault();
+  if (isSubmitting) return;
+  isSubmitting = true;
 
-  const fd = new FormData(form);
-  [...filesInput.files].forEach(f => fd.append('files', f));
+  const submitBtn = form.querySelector('button[type="submit"]');
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Memproses...';
 
   try {
+    const isiKonten = form
+      .querySelector('textarea[name="isi_konten"]')
+      .value
+      .trim();
+
+    if (!isiKonten && selectedFiles.length === 0) {
+      alert('Isi pesan atau lampirkan minimal satu file.');
+      throw new Error('Validation failed');
+    }
+
+    const fd = new FormData();
+    fd.set('isi_konten', isiKonten);
+
+    const email = form.querySelector('input[name="email"]').value.trim();
+    if (email) fd.set('email', email);
+
+    selectedFiles.forEach(file => {
+      fd.append('files', file);
+    });
+
     const res = await fetch('/api/links', {
       method: 'POST',
       body: fd
@@ -59,7 +124,7 @@ form.addEventListener('submit', async e => {
     const json = await res.json();
 
     if (!json.success) {
-      alert(json.message || 'Failed to create link');
+      alert(json.message || 'Gagal membuat tautan');
       return;
     }
 
@@ -68,7 +133,10 @@ form.addEventListener('submit', async e => {
 
   } catch (err) {
     console.error(err);
-    alert('Server error');
+  } finally {
+    isSubmitting = false;
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Buat Tautan';
   }
 });
 
@@ -85,4 +153,6 @@ closeModal.onclick = () => {
   modal.classList.add('hidden');
   form.reset();
   fileList.innerHTML = '';
+  selectedFiles = [];
+  syncInputFiles();
 };
