@@ -1,4 +1,4 @@
-const socket = io({ autoConnect: false });
+const socket = io();
 
 const params = new URLSearchParams(location.search);
 const token = params.get('token');
@@ -27,10 +27,13 @@ if (!token) {
    SOCKET
 ================================ */
 socket.on('connect', () => {
+  mySocketId = socket.id;
   socket.emit('join-link', token);
+  console.log('Socket connected:', mySocketId);
 });
 
 socket.on('burn', () => {
+  console.log('BURN RECEIVED');
   if (!opened) {
     showBurned();
   }
@@ -92,6 +95,26 @@ function renderContent(data) {
       return;
     }
 
+    if (file.mime.startsWith('audio/')) {
+    const audio = document.createElement('audio');
+    audio.src = file.signedUrl;
+    audio.controls = true;
+    audio.preload = 'metadata';
+    audio.className = 'media-audio';
+
+    const label = document.createElement('div');
+    label.textContent = file.name;
+    label.className = 'audio-label';
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'audio-wrapper';
+    wrapper.appendChild(label);
+    wrapper.appendChild(audio);
+
+    filesBox.appendChild(wrapper);
+    return;
+    }
+
     const a = document.createElement('a');
     a.href = file.signedUrl;
     a.textContent = `${file.name}`;
@@ -128,8 +151,3 @@ function showBurned() {
   contentBox.style.display = 'none';
   burnedBox.style.display = 'block';
 }
-
-/* ===============================
-   START
-================================ */
-socket.connect();

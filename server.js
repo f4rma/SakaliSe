@@ -19,12 +19,14 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
-
 /* ===============================
    SOCKET.IO
 ================================ */
 io.on('connection', socket => {
+  console.log('Socket connected:', socket.id);
+
   socket.on('join-link', token => {
+    console.log(`Socket ${socket.id} join room ${token}`);
     socket.join(token);
   });
 });
@@ -34,6 +36,7 @@ app.use((req, res, next) => {
   next();
 });
 
+/* =============================== */
 app.use('/api/links', linkRoutes);
 
 app.use(errorHandler);

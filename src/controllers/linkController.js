@@ -96,7 +96,7 @@ exports.accessLink = async (req, res, next) => {
     const { token } = req.params;
     const { socketId } = req.query;
 
-    // Update status → TERPAKAI (bersifat atomic)
+    // ATOMIC UPDATE → hanya satu request yang berhasil
     const { data, error } = await supabase
       .from('links')
       .update({
@@ -108,28 +108,20 @@ exports.accessLink = async (req, res, next) => {
       .select()
       .maybeSingle();
 
+    // JIKA GAGAL → sudah dibuka di tab lain
     if (error || !data) {
-      const err = new Error('Link tidak valid atau sudah diakses');
-      err.statusCode = 410;
-      throw err;
+      return res.status(410).json({
+        success: false,
+        message: 'Link sudah diakses'
+      });
     }
 
-    //  Emit Socket.IO (inti mekanisme burn)
-    if (socketId && req.io) {
+    // BURN TAB LAIN (KECUALI TAB INI)
+    if (req.io && socketId) {
       req.io.to(token).except(socketId).emit('burn');
     }
 
-    const signedFiles = await createSignedUrls(data.files);
-
-    if (process.env.ADMIN_EMAIL) {
-      await kirimNotifikasiAkses({
-        to: process.env.ADMIN_EMAIL,
-        judul: data.judul,
-        token,
-        waktu_diakses: new Date().toISOString(),
-        ip_address: req.ip
-      });
-    }
+    const signedFiles = await createSignedUrls(data.files || []);
 
     res.json({
       success: true,
@@ -144,3 +136,4 @@ exports.accessLink = async (req, res, next) => {
     next(err);
   }
 };
+

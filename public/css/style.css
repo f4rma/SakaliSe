@@ -378,3 +378,18 @@ input[type="file"] {
 .file-item small {
   color: var(--muted);
 }
+
+.media-audio {
+  width: 100%;
+  max-width: 420px;
+}
+
+.audio-wrapper {
+  margin-top: 12px;
+}
+
+.audio-label {
+  font-size: 0.9rem;
+  margin-bottom: 4px;
+  opacity: 0.8;
+}
