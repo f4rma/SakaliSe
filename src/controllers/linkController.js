@@ -1,18 +1,19 @@
 const supabase = require('../config/supabase');
-const { generateToken } = require('../utils/generateToken');
-const { isAllowedFile } = require('../utils/fileValidator');
-const { uploadFiles, createSignedUrls } = require('../services/storageService');
+const { generateToken } = require('../utils/buatToken');
+const { cekFileDiizinkan } = require('../utils/validasiFile');
 const {
-  kirimLinkSekaliPakai,
-  kirimNotifikasiAkses
-} = require('../services/emailService');
+  uploadFiles,
+  createSignedUrls
+} = require('../services/layananPenyimpanan');
+const { kirimLinkSekaliPakai } = require('../services/layananEmail');
 
-//  Buat Link
-exports.createLink = async (req, res, next) => {
+// Buat tautan baru, dapat diakses kapan saja selama data masih ada
+exports.buatTautan = async (req, res, next) => {
   try {
     const { judul, isi_konten, email } = req.body;
     const files = req.files || [];
 
+    // Validasi: minimal teks atau file harus ada
     if (!isi_konten && files.length === 0) {
       return res.status(400).json({
         success: false,
@@ -20,68 +21,51 @@ exports.createLink = async (req, res, next) => {
       });
     }
 
-    // VALIDASI FILE
+    // Validasi tipe file
     files.forEach(file => {
-      if (!isAllowedFile(file.mimetype)) {
+      if (!cekFileDiizinkan(file.mimetype)) {
         const err = new Error('Tipe file tidak diizinkan');
         err.statusCode = 400;
         throw err;
       }
     });
 
+    // Generate token unik
     const token = generateToken();
 
-    const uploadedFiles =
+     // Upload file ke Supabase Storage
+    const fileTersimpan =
       files.length > 0 ? await uploadFiles(token, files) : [];
 
+    // Simpan metadata ke database
     const { error } = await supabase.from('links').insert({
       token,
       judul: judul || 'Pesan Rahasia | SakaliSe',
       isi_konten: isi_konten || null,
-      files: uploadedFiles,
+      files: fileTersimpan,
       status: 'AKTIF'
     });
 
     if (error) throw error;
 
+    // Bentuk URL akses
     const baseUrl =
       process.env.BASE_URL ||
       `${req.protocol}://${req.get('host')}`;
 
-    const shareUrl = `${baseUrl}/view.html?token=${token}`;
+    const bagikanUrl = `${baseUrl}/tampilan.html?token=${token}`;
 
+    // Kirim email jika diminta
     if (email) {
-      kirimLinkSekaliPakai({ to: email, shareUrl }).catch(() => {});
-    }
-
-    res.json({ success: true, data: { shareUrl } });
-
-  } catch (err) {
-    next(err);
-  }
-};
-
-
-//   Cek link (disini aman, tanpa burn)
-exports.checkLink = async (req, res, next) => {
-  try {
-    const { token } = req.params;
-
-    const { data, error } = await supabase
-      .from('links')
-      .select('judul, status')
-      .eq('token', token)
-      .maybeSingle();
-
-    if (error || !data || data.status !== 'AKTIF') {
-      return res.json({ valid: false });
+      kirimLinkSekaliPakai({
+        to: email,
+        shareUrl: bagikanUrl
+      }).catch(() => {});
     }
 
     res.json({
-      valid: true,
-      data: {
-        judul: data.judul
-      }
+      success: true,
+      data: { bagikanUrl }
     });
 
   } catch (err) {
@@ -89,14 +73,38 @@ exports.checkLink = async (req, res, next) => {
   }
 };
 
+// Cek tautan (tanpa menghapus data)
+exports.cekTautan = async (req, res, next) => {
+  try {
+    const { token } = req.params;
 
-//   Akses link, socket.IO emit disini
-exports.accessLink = async (req, res, next) => {
+    const { data } = await supabase
+      .from('links')
+      .select('judul, status')
+      .eq('token', token)
+      .maybeSingle();
+
+    if (!data || data.status !== 'AKTIF') {
+      return res.json({ valid: false });
+    }
+
+    res.json({
+      valid: true,
+      data: { judul: data.judul }
+    });
+
+  } catch (err) {
+    next(err);
+  }
+};
+
+// Akses tautan (musnah setelah dibaca)
+exports.aksesTautan = async (req, res, next) => {
   try {
     const { token } = req.params;
     const { socketId } = req.query;
 
-    // ATOMIC UPDATE → hanya satu request yang berhasil
+    // Ambil data link, Jika tidak ada berarti sudah pernah dibuka
     const { data, error } = await supabase
       .from('links')
       .update({
@@ -108,7 +116,6 @@ exports.accessLink = async (req, res, next) => {
       .select()
       .maybeSingle();
 
-    // JIKA GAGAL → sudah dibuka di tab lain
     if (error || !data) {
       return res.status(410).json({
         success: false,
@@ -116,19 +123,22 @@ exports.accessLink = async (req, res, next) => {
       });
     }
 
-    // BURN TAB LAIN (KECUALI TAB INI)
+    // Tutup tab lain (socket IO bekerja)
     if (req.io && socketId) {
       req.io.to(token).except(socketId).emit('burn');
     }
 
-    const signedFiles = await createSignedUrls(data.files || []);
+    // Buat URL bertanda untuk file (hanya untuk sesi akses ini)
+    const filesDenganUrl =
+      await createSignedUrls(data.files || []);
 
+    // Kirim respon ke client
     res.json({
       success: true,
       data: {
         judul: data.judul,
         isi_konten: data.isi_konten,
-        files: signedFiles
+        files: filesDenganUrl
       }
     });
 
@@ -136,4 +146,3 @@ exports.accessLink = async (req, res, next) => {
     next(err);
   }
 };
-

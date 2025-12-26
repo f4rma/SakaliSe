@@ -7,16 +7,14 @@
 
   <!-- CSS -->
   <link rel="stylesheet" href="/css/style.css" />
-
 </head>
 <body>
 
   <!-- HEADER -->
-  <header class="topbar">
-    <div class="brand">SakaliSe</div>
-
+  <header class="bilah-atas">
+    <div class="merek">SakaliSe</div>
     <div class="top-actions">
-      <button id="toggleTheme" title="Toggle theme">🌓</button>
+      <button id="toggleTheme">🌓</button>
     </div>
   </header>
 
@@ -24,76 +22,64 @@
   <main class="container">
     <div class="card">
 
-      <h1>Konten sekali akses</h1>
+      <h1>Konten Sekali Akses</h1>
       <p class="subtitle">
-        Kirim pesan ataupun file. Semua akan hilang setelah diakses.
+        Kirim pesan atau file. Semua akan hilang setelah dibuka.
       </p>
 
       <form id="form">
 
-        <!-- MESSAGE -->
+        <!-- Pesan -->
         <textarea
           name="isi_konten"
-          placeholder="Ketik pesan Anda disini..."
+          placeholder="Ketik pesan Anda di sini..."
         ></textarea>
 
-        <!-- ATTACH MEDIA -->        
-
-        <div id="dropzone" class="dropzone">
-          <input
-            type="file"
-            id="files"
-            name="files"
-            multiple
-            hidden
-          />
-
+        <!-- Dropzone -->
+        <div id="areaUnggah" class="dropzone">
+          <input type="file" id="files" name="files" multiple hidden />
           <div class="dz-inner">
             <div class="dz-plus">+</div>
             <p>Lampirkan Media</p>
-            <small>Klik atau seret file ke sini</small>
-            <small>(Gambar/Audio/Video)</small>
+            <small>Klik atau seret file</small>
           </div>
         </div>
 
-        <div id="fileList" class="file-list"></div>
+        <!-- Daftar File -->
+        <div id="daftarFile" class="daftar-file"></div>
 
-        <!-- EMAIL -->
-        <label style="margin-top:20px">Kirim melalui Email (opsional)</label>
-        <input
-          type="email"
-          name="email"
-          placeholder="contoh@gmail.com"
-        />
+        <!-- Email -->
+        <label>Kirim melalui Email (opsional)</label>
+        <input type="email" name="email" placeholder="contoh@gmail.com" />
 
-        <!-- SUBMIT -->
+        <!-- submit -->
         <button type="submit" class="lock-btn">
           Buat Tautan
         </button>
+
       </form>
     </div>
   </main>
 
-  <!-- RESULT MODAL -->
+  <!-- modal hasil -->
   <div id="modal" class="modal hidden">
     <div class="modal-card">
       <div class="check">✔</div>
-      <h2>Pesan siap dikirim</h2>
-      <p class="muted">
-        Transmisi berhasil. Tautan akan kedaluwarsa setelah diakses.
-      </p>
+      <h2>Pesan Siap Dibagikan</h2>
+      <p class="muted">Tautan akan hangus setelah diakses.</p>
 
       <div class="link-box">
-        <input id="resultLink" readonly />
-        <button id="copyBtn">Salin</button>
+        <input id="linkHasil" readonly />
+        <button id="tombolSalin">Salin</button>
       </div>
 
-      <button id="closeModal" class="secondary">
-        Buat pesan baru
+      <button id="tutupModal" class="secondary">
+        Buat Pesan Baru
       </button>
     </div>
   </div>
 
+  <!-- JS -->
   <script src="/js/app.js"></script>
   <script src="/js/tema.js"></script>
 </body>

@@ -1,11 +1,17 @@
+// Mendefinisikan endpoint API untuk tautan sekali pakai
 const express = require('express');
 const controller = require('../controllers/linkController');
-const upload = require('../middlewares/upload');
+const unggah = require('../middlewares/unggah');
 
 const router = express.Router();
 
-router.post('/', upload.array('files'),controller.createLink);
-router.get('/:token/check', controller.checkLink);
-router.get('/:token', controller.accessLink);
+// Membuat link baru (dengan upload file)
+router.post('/', unggah.array('files'), controller.buatTautan);
+
+// Mengecek validitas link 
+router.get('/:token/check', controller.cekTautan);
+
+// Mengakses link (sekali pakai) 
+router.get('/:token', controller.aksesTautan);
 
 module.exports = router;

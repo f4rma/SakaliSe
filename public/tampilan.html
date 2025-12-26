@@ -9,25 +9,25 @@
 
   <div class="container">
 
-    <!-- CONFIRM -->
-    <div class="card" id="confirm">
+    <!-- Konfirmasi -->
+    <div class="card" id="konfirmasi">
       <p class="muted">
         Pesan ini hanya dapat dibuka <b>sekali</b>.
       </p>
-      <button id="openBtn" class="lock-btn">
+      <button id="buka" class="lock-btn">
         Buka Pesan
       </button>
     </div>
 
-    <!-- CONTENT -->
-    <div class="card" id="content" style="display:none">
+    <!-- Konten -->
+    <div class="card" id="konten" style="display:none">
       <h2 id="judul">Pesan rahasia</h2>
       <p id="isi"></p>
       <div id="files"></div>
     </div>
 
-    <!-- BURNED -->
-    <div class="card" id="burned" style="display:none">
+    <!-- Hangus -->
+    <div class="card" id="hangus" style="display:none">
       <h2>Konten Dihancurkan</h2>
       <p class="muted">
         Link ini telah digunakan atau dibuka di tempat lain.
@@ -37,7 +37,7 @@
   </div>
 
   <script src="/socket.io/socket.io.js"></script>
-  <script src="/js/view.js"></script>
+  <script src="/js/tampilan.js"></script>
   <script src="/js/tema.js"></script>
 </body>
 </html>

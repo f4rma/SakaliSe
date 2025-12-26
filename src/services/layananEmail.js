@@ -19,9 +19,7 @@ const sendEmail = async ({ to, subject, html }) => {
   }
 };
 
-/**
- * Email: Link sekali pakai dibuat
- */
+// Email: Link sekali pakai dibuat
 const kirimLinkSekaliPakai = async ({ to, shareUrl }) => {
   const html = `
   <!DOCTYPE html>
@@ -45,7 +43,7 @@ const kirimLinkSekaliPakai = async ({ to, shareUrl }) => {
 
   return sendEmail({
     to,
-    subject: '🔐 SakaliSe — One-Time Secret Link',
+    subject: 'SakaliSe — Konten Sekali Akses',
     html
   });
 };

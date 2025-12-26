@@ -1,158 +1,152 @@
-/* =========================
-   ELEMENTS
-========================= */
-const form = document.getElementById('form');
-const modal = document.getElementById('modal');
-const resultLink = document.getElementById('resultLink');
-const copyBtn = document.getElementById('copyBtn');
-const closeModal = document.getElementById('closeModal');
+// Elemen form utama
+const formTautan = document.getElementById('form');
 
-const dropzone = document.getElementById('dropzone');
-const filesInput = document.getElementById('files');
-const fileList = document.getElementById('fileList');
+// Modal hasil
+const modalHasil = document.getElementById('modal');
+const inputLinkHasil = document.getElementById('linkHasil');
+const tombolSalin = document.getElementById('tombolSalin');
+const tombolTutupModal = document.getElementById('tutupModal');
 
-/* =========================
-   FILE STATE
-========================= */
-let selectedFiles = [];
+// Area unggah file
+const areaUnggah = document.getElementById('areaUnggah');
+const inputFile = document.getElementById('files');
+const daftarFile = document.getElementById('daftarFile');
 
-/* =========================
-   DROPZONE EVENTS
-========================= */
-dropzone.addEventListener('click', () => filesInput.click());
+// Penyimpanan file terpilih
+let fileTerpilih = [];
 
-dropzone.addEventListener('dragover', e => {
+// interaksi area unggah file
+
+// Klik area → buka file picker
+areaUnggah.addEventListener('click', () => inputFile.click());
+
+// Drag over
+areaUnggah.addEventListener('dragover', e => {
   e.preventDefault();
-  dropzone.classList.add('active');
+  areaUnggah.classList.add('active');
 });
 
-dropzone.addEventListener('dragleave', () => {
-  dropzone.classList.remove('active');
+// Drag keluar
+areaUnggah.addEventListener('dragleave', () => {
+  areaUnggah.classList.remove('active');
 });
 
-dropzone.addEventListener('drop', e => {
+// Drop file
+areaUnggah.addEventListener('drop', e => {
   e.preventDefault();
-  dropzone.classList.remove('active');
-
-  const newFiles = Array.from(e.dataTransfer.files);
-  addFiles(newFiles);
+  areaUnggah.classList.remove('active');
+  tambahFile([...e.dataTransfer.files]);
 });
 
-filesInput.addEventListener('change', e => {
-  addFiles(Array.from(e.target.files));
+// Pilih file via input
+inputFile.addEventListener('change', e => {
+  tambahFile([...e.target.files]);
 });
 
-/* =========================
-   FILE HANDLING
-========================= */
-function addFiles(files) {
+
+// manajemen file
+function tambahFile(files) {
   files.forEach(file => {
-    // Cegah duplikat (nama + ukuran)
-    if (!selectedFiles.some(f => f.name === file.name && f.size === file.size)) {
-      selectedFiles.push(file);
-    }
+    const sudahAda = fileTerpilih.some(
+      f => f.name === file.name && f.size === file.size
+    );
+    if (!sudahAda) fileTerpilih.push(file);
   });
 
-  syncInputFiles();
-  renderFiles();
+  sinkronkanInput();
+  renderDaftarFile();
 }
 
-function syncInputFiles() {
+// Sinkronkan ke input file (penting untuk FormData)
+function sinkronkanInput() {
   const dt = new DataTransfer();
-  selectedFiles.forEach(file => dt.items.add(file));
-  filesInput.files = dt.files;
+  fileTerpilih.forEach(file => dt.items.add(file));
+  inputFile.files = dt.files;
 }
 
-function renderFiles() {
-  fileList.innerHTML = '';
+// Render daftar file di UI
+function renderDaftarFile() {
+  daftarFile.innerHTML = '';
+  if (fileTerpilih.length === 0) return;
 
-  if (selectedFiles.length === 0) return;
-
-  selectedFiles.forEach(file => {
-    const div = document.createElement('div');
-    div.className = 'file-item';
-
-    div.innerHTML = `
+  fileTerpilih.forEach(file => {
+    const item = document.createElement('div');
+    item.className = 'file-item';
+    item.innerHTML = `
       <span title="${file.name}">${file.name}</span>
       <small>${(file.size / 1024 / 1024).toFixed(2)} MB</small>
     `;
-
-    fileList.appendChild(div);
+    daftarFile.appendChild(item);
   });
 }
 
-/* =========================
-   FORM SUBMIT
-========================= */
-let isSubmitting = false;
+// form submit
+let sedangMengirim = false;
 
-form.addEventListener('submit', async e => {
+formTautan.addEventListener('submit', async e => {
   e.preventDefault();
-  if (isSubmitting) return;
-  isSubmitting = true;
+  if (sedangMengirim) return;
 
-  const submitBtn = form.querySelector('button[type="submit"]');
-  submitBtn.disabled = true;
-  submitBtn.textContent = 'Memproses...';
+  sedangMengirim = true;
+
+  const tombolSubmit = formTautan.querySelector('button[type="submit"]');
+  tombolSubmit.disabled = true;
+  tombolSubmit.textContent = 'Memproses...';
 
   try {
-    const isiKonten = form
+    const isiPesan = formTautan
       .querySelector('textarea[name="isi_konten"]')
-      .value
-      .trim();
+      .value.trim();
 
-    if (!isiKonten && selectedFiles.length === 0) {
+    if (!isiPesan && fileTerpilih.length === 0) {
       alert('Isi pesan atau lampirkan minimal satu file.');
-      throw new Error('Validation failed');
+      throw new Error('Validasi gagal');
     }
 
-    const fd = new FormData();
-    fd.set('isi_konten', isiKonten);
+    const formData = new FormData();
+    formData.set('isi_konten', isiPesan);
 
-    const email = form.querySelector('input[name="email"]').value.trim();
-    if (email) fd.set('email', email);
+    const email = formTautan.querySelector('input[name="email"]').value.trim();
+    if (email) formData.set('email', email);
 
-    selectedFiles.forEach(file => {
-      fd.append('files', file);
-    });
+    fileTerpilih.forEach(file => formData.append('files', file));
 
-    const res = await fetch('/api/links', {
+    const response = await fetch('/api/links', {
       method: 'POST',
-      body: fd
+      body: formData
     });
 
-    const json = await res.json();
+    const hasil = await response.json();
 
-    if (!json.success) {
-      alert(json.message || 'Gagal membuat tautan');
+    if (!hasil.success) {
+      alert(hasil.message || 'Gagal membuat tautan');
       return;
     }
 
-    resultLink.value = json.data.shareUrl;
-    modal.classList.remove('hidden');
+    // Tampilkan hasil
+    inputLinkHasil.value = hasil.data.bagikanUrl;
+    modalHasil.classList.remove('hidden');
 
   } catch (err) {
     console.error(err);
   } finally {
-    isSubmitting = false;
-    submitBtn.disabled = false;
-    submitBtn.textContent = 'Buat Tautan';
+    sedangMengirim = false;
+    tombolSubmit.disabled = false;
+    tombolSubmit.textContent = 'Buat Tautan';
   }
 });
 
-/* =========================
-   MODAL ACTIONS
-========================= */
-copyBtn.onclick = () => {
-  navigator.clipboard.writeText(resultLink.value);
-  copyBtn.textContent = 'Copied!';
-  setTimeout(() => (copyBtn.textContent = 'Copy'), 1200);
+// aksi tombol salin
+tombolSalin.onclick = () => {
+  navigator.clipboard.writeText(inputLinkHasil.value);
+  tombolSalin.textContent = 'Tersalin!';
+  setTimeout(() => (tombolSalin.textContent = 'Salin'), 1200);
 };
 
-closeModal.onclick = () => {
-  modal.classList.add('hidden');
-  form.reset();
-  fileList.innerHTML = '';
-  selectedFiles = [];
-  syncInputFiles();
+tombolTutupModal.onclick = () => {
+  modalHasil.classList.add('hidden');
+  formTautan.reset();
+  daftarFile.innerHTML = '';
+  fileTerpilih = [];
+  sinkronkanInput();
 };

@@ -1,37 +1,45 @@
 const supabase = require('../config/supabase');
 
+// unggah file ke supabase
 exports.uploadFiles = async (token, files) => {
-  const uploaded = [];
+  const hasilUnggah = [];
 
   for (const file of files) {
     const path = `links/${token}/${Date.now()}-${file.originalname}`;
 
     const { error } = await supabase.storage
       .from('sakalise-files')
-      .upload(path, file.buffer, { contentType: file.mimetype });
+      .upload(path, file.buffer, {
+        contentType: file.mimetype
+      });
 
     if (error) throw error;
 
-    uploaded.push({
+    hasilUnggah.push({
       path,
       name: file.originalname,
       mime: file.mimetype
     });
   }
 
-  return uploaded;
+  return hasilUnggah;
 };
 
+// Buat signed URL untuk file
+
 exports.createSignedUrls = async files => {
-  const result = [];
+  const hasil = [];
 
   for (const file of files || []) {
     const { data } = await supabase.storage
       .from('sakalise-files')
-      .createSignedUrl(file.path, 60);
+      .createSignedUrl(file.path, 60); // 60 detik
 
-    result.push({ ...file, signedUrl: data.signedUrl });
+    hasil.push({
+      ...file,
+      signedUrl: data.signedUrl
+    });
   }
 
-  return result;
+  return hasil;
 };

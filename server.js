@@ -1,10 +1,14 @@
+// sebagai entry point aplikasi SakaliSe.
+// Menginisialisasi Express, HTTP Server, dan Socket.IO.
+
 require('dotenv').config();
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 
-const linkRoutes = require('./src/routes/route');
-const errorHandler = require('./src/middlewares/errorHandler');
+// Import routing dan middleware utama
+const ruteTautan = require('./src/routes/route');
+const penangananKesalahan = require('./src/middlewares/kelolaError');
 
 const app = express();
 const server = http.createServer(app);
@@ -12,38 +16,42 @@ const io = new Server(server);
 
 const PORT = process.env.PORT || 3000;
 
-/* ===============================
-   MIDDLEWARE
-================================ */
+// Middleware Aplikasi
+// Digunakan untuk parsing request & static file
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
-/* ===============================
-   SOCKET.IO
-================================ */
-io.on('connection', socket => {
-  console.log('Socket connected:', socket.id);
 
+//  KOnfigurasi Socket.IO
+// Digunakan untuk mekanisme "burn tab"
+io.on('connection', socket => {
+  console.log('Socket terhubung:', socket.id);
+
+// Setiap tab akan masuk ke "room" berdasarkan token link
+//   agar tab lain bisa ditutup saat link dibuka   
   socket.on('join-link', token => {
-    console.log(`Socket ${socket.id} join room ${token}`);
+    console.log(`Socket ${socket.id} bergabung ke room ${token}`);
     socket.join(token);
   });
 });
 
+
+// Menyisipkan instance Socket.IO ke request agar bisa diakses di controller
 app.use((req, res, next) => {
   req.io = io;
   next();
 });
 
-/* =============================== */
-app.use('/api/links', linkRoutes);
+// Routing Utama
+app.use('/api/links', ruteTautan);
 
-app.use(errorHandler);
+// Middleware penanganan error 
+app.use(penangananKesalahan);
 
-/* ===============================
-   START SERVER
-================================ */
+/* =================
+   Jalankan Server
+==================== */
 server.listen(PORT, '0.0.0.0', () => {
-  console.log(`SakaliSe running at http://localhost:${PORT}`);
+  console.log(`SakaliSe berjalan di http://localhost:${PORT}`);
 });

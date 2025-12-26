@@ -1,7 +1,8 @@
+//Middleware global untuk menangani seluruh error aplikasi
 module.exports = (err, req, res, next) => {
   console.error('Terjadi kesalahan:', err);
 
-  // validasi error
+  // Error validasi data 
   if (err.name === 'ValidationError') {
     return res.status(400).json({
       success: false,
@@ -10,16 +11,15 @@ module.exports = (err, req, res, next) => {
     });
   }
 
-  // error duplikasi data
+  // Error duplikasi data (umumnya dari database)
   if (err.code === 23505) {
     return res.status(400).json({
       success: false,
-      message: 'Data sudah ada',
-      field: Object.keys(err.keyPattern)[0]
+      message: 'Data sudah ada'
     });
   }
 
-  // error default
+  // Error default (internal server error)
   res.status(err.statusCode || 500).json({
     success: false,
     message: err.message || 'Terjadi kesalahan pada server'

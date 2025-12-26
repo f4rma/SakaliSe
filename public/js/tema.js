@@ -1,24 +1,29 @@
 // ===============================
-// THEME TOGGLE (BUTTON VERSION)
+// PENGATURAN TEMA (GELAP / TERANG)
 // ===============================
 
-const root = document.documentElement;
-const toggleBtn = document.getElementById('toggleTheme');
+// Akses root HTML
+const rootHtml = document.documentElement;
 
-// init theme
-const savedTheme = localStorage.getItem('theme') || 'dark';
-root.setAttribute('data-theme', savedTheme);
-updateIcon(savedTheme);
+// Tombol toggle tema
+const tombolTema = document.getElementById('toggleTheme');
 
-toggleBtn.addEventListener('click', () => {
-  const current = root.getAttribute('data-theme');
-  const next = current === 'dark' ? 'light' : 'dark';
+// Ambil tema dari localStorage (default: gelap)
+const temaTersimpan = localStorage.getItem('theme') || 'dark';
+rootHtml.setAttribute('data-theme', temaTersimpan);
+perbaruiIkonTema(temaTersimpan);
 
-  root.setAttribute('data-theme', next);
-  localStorage.setItem('theme', next);
-  updateIcon(next);
+// Event klik tombol tema
+tombolTema.addEventListener('click', () => {
+  const temaSaatIni = rootHtml.getAttribute('data-theme');
+  const temaBerikutnya = temaSaatIni === 'dark' ? 'light' : 'dark';
+
+  rootHtml.setAttribute('data-theme', temaBerikutnya);
+  localStorage.setItem('theme', temaBerikutnya);
+  perbaruiIkonTema(temaBerikutnya);
 });
 
-function updateIcon(theme) {
-  toggleBtn.textContent = theme === 'dark' ? '🌙' : '☀️';
+// Mengubah ikon sesuai tema
+function perbaruiIkonTema(tema) {
+  tombolTema.textContent = tema === 'dark' ? '🌙' : '☀️';
 }
