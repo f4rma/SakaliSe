@@ -126,6 +126,21 @@ textarea {
 
 .file-item {
   margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hapus-file {
+  font-size: 16px;
+  font-weight: bold;
+  color: #e74c3c;
+  cursor: pointer;
+  margin-left: 8px;
+  transition: color 0.2s;
+}
+.hapus-file:hover {
+  color: #c0392b;
 }
 
 /* BUTTON */
@@ -369,15 +384,35 @@ input[type="file"] {
 }
 
 .file-item span {
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  justify-content: flex-start;
+}
+
+.file-nama {
+  flex: 1 1 auto;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: 85%;
+}
+
+.file-ukuran {
+  margin-left: 16px;
+  margin-right: 8px;
+  color: var(--muted);
+  min-width: 70px;
+  text-align: right;
+  display: inline-block;
+}
+
+.hapus-file {
 }
 
 .file-item small {
   color: var(--muted);
-}
 
 .media-audio {
   width: 100%;

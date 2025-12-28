@@ -67,15 +67,43 @@ function sinkronkanInput() {
 // Render daftar file di UI
 function renderDaftarFile() {
   daftarFile.innerHTML = '';
-  if (fileTerpilih.length === 0) return;
+  const dzBagianDalam = document.querySelector('.dz-inner');
+  if (fileTerpilih.length === 0) {
+    if (dzBagianDalam) dzBagianDalam.style.display = '';
+    return;
+  } else {
+    if (dzBagianDalam) dzBagianDalam.style.display = 'none';
+  }
 
-  fileTerpilih.forEach(file => {
+  fileTerpilih.forEach((file, idx) => {
     const item = document.createElement('div');
     item.className = 'file-item';
-    item.innerHTML = `
-      <span title="${file.name}">${file.name}</span>
-      <small>${(file.size / 1024 / 1024).toFixed(2)} MB</small>
-    `;
+
+    // Nama file
+    const nama = document.createElement('span');
+    nama.title = file.name;
+    nama.textContent = file.name;
+    nama.className = 'file-nama';
+
+    // Ukuran file
+    const ukuran = document.createElement('small');
+    ukuran.textContent = `${(file.size / 1024 / 1024).toFixed(2)} MB`;
+    ukuran.className = 'file-ukuran';
+
+    // Tombol silang
+    const btnHapus = document.createElement('span');
+    btnHapus.textContent = '×';
+    btnHapus.title = 'Hapus file';
+    btnHapus.className = 'hapus-file';
+    btnHapus.onclick = () => {
+      fileTerpilih.splice(idx, 1);
+      sinkronkanInput();
+      renderDaftarFile();
+    };
+
+    item.appendChild(nama);
+    item.appendChild(ukuran);
+    item.appendChild(btnHapus);
     daftarFile.appendChild(item);
   });
 }
