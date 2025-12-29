@@ -15,8 +15,29 @@ const daftarFile = document.getElementById('daftarFile');
 // Penyimpanan file terpilih
 let fileTerpilih = [];
 
-// interaksi area unggah file
+// Notifikasi kecil tepat di bawah kotak upload file
+let notifFile = document.getElementById('notifFile');
+if (!notifFile) {
+  notifFile = document.createElement('div');
+  notifFile.id = 'notifFile';
+  notifFile.style.margin = '6px 0 0 0';
+  notifFile.style.textAlign = 'center';
+  notifFile.style.color = '#e74c3c';
+  notifFile.style.background = 'none';
+  notifFile.style.padding = '0';
+  notifFile.style.fontWeight = '400';
+  notifFile.style.fontSize = '0.93rem';
+  notifFile.style.letterSpacing = '0.01em';
+  notifFile.style.display = 'none';
+  notifFile.style.transition = 'opacity 0.4s';
+  notifFile.style.borderRadius = '0';
+  notifFile.style.boxShadow = 'none';
+  // Tempelkan tepat di bawah kotak upload file
+  areaUnggah.parentNode.insertBefore(notifFile, areaUnggah.nextSibling);
+}
+let notifTimeout = null;
 
+// interaksi area unggah file
 // Klik area → buka file picker
 areaUnggah.addEventListener('click', () => inputFile.click());
 
@@ -46,12 +67,36 @@ inputFile.addEventListener('change', e => {
 
 // manajemen file
 function tambahFile(files) {
+  let adaFileTidakValid = false;
   files.forEach(file => {
-    const sudahAda = fileTerpilih.some(
-      f => f.name === file.name && f.size === file.size
-    );
-    if (!sudahAda) fileTerpilih.push(file);
+    // Validasi tipe file
+    if (
+      file.type.startsWith('image/') ||
+      file.type.startsWith('audio/') ||
+      file.type.startsWith('video/')
+    ) {
+      const sudahAda = fileTerpilih.some(
+        f => f.name === file.name && f.size === file.size
+      );
+      if (!sudahAda) fileTerpilih.push(file);
+    } else {
+      adaFileTidakValid = true;
+    }
   });
+
+
+  if (adaFileTidakValid) {
+    notifFile.textContent = 'Tipe file tidak diizinkan';
+    notifFile.style.display = 'block';
+    notifFile.style.opacity = '1';
+    if (notifTimeout) clearTimeout(notifTimeout);
+    notifTimeout = setTimeout(() => {
+      notifFile.style.opacity = '0';
+      setTimeout(() => {
+        notifFile.style.display = 'none';
+      }, 400);
+    }, 1800);
+  }
 
   sinkronkanInput();
   renderDaftarFile();
@@ -98,6 +143,7 @@ function renderDaftarFile() {
     btnHapus.onclick = () => {
       fileTerpilih.splice(idx, 1);
       sinkronkanInput();
+      inputFile.value = ""; 
       renderDaftarFile();
     };
 

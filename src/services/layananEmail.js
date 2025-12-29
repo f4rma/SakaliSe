@@ -1,8 +1,8 @@
 // src/utils/emailService.js
 const pengirimEmail = require('../config/email');
 
-// Low-level email sender
-const sendEmail = async ({ to, subject, html }) => {
+// Pengirim email tingkat rendah
+const kirimEmail = async ({ to, subject, html }) => {
   try {
     const info = await pengirimEmail.sendMail({
       from: `"SakaliSe" <${process.env.SMTP_USER}>`,
@@ -43,7 +43,7 @@ const kirimLinkSekaliPakai = async ({ to, shareUrl }) => {
   </html>
   `;
 
-  return sendEmail({
+  return kirimEmail({
     to,
     subject: 'SakaliSe — Konten Sekali Akses',
     html

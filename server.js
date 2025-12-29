@@ -23,7 +23,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
 
-//  KOnfigurasi Socket.IO
+//  Konfigurasi Socket.IO
 // Digunakan untuk mekanisme "burn tab"
 io.on('connection', socket => {
   console.log('Socket terhubung:', socket.id);

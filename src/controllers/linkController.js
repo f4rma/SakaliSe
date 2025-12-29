@@ -1,9 +1,9 @@
 const supabase = require('../config/supabase');
-const { generateToken } = require('../utils/buatToken');
+const { buatToken } = require('../utils/buatToken');
 const { cekFileDiizinkan } = require('../utils/validasiFile');
 const {
-  uploadFiles,
-  createSignedUrls
+  unggahFile,
+  buatSignedUrls
 } = require('../services/layananPenyimpanan');
 const { kirimLinkSekaliPakai } = require('../services/layananEmail');
 
@@ -31,11 +31,11 @@ exports.buatTautan = async (req, res, next) => {
     });
 
     // Generate token unik
-    const token = generateToken();
+    const token = buatToken();
 
      // Upload file ke Supabase Storage
     const fileTersimpan =
-      files.length > 0 ? await uploadFiles(token, files) : [];
+      files.length > 0 ? await unggahFile(token, files) : [];
 
     // Simpan metadata ke database
     const { error } = await supabase.from('links').insert({
@@ -130,7 +130,8 @@ exports.aksesTautan = async (req, res, next) => {
 
     // Buat URL bertanda untuk file (hanya untuk sesi akses ini)
     const filesDenganUrl =
-      await createSignedUrls(data.files || []);
+      await buatSignedUrls(data.files || []);
+
 
     // Kirim respon ke client
     res.json({
@@ -141,6 +142,23 @@ exports.aksesTautan = async (req, res, next) => {
         files: filesDenganUrl
       }
     });
+
+    // Setelah pesan diakses, hapus data dan file dari Supabase dengan delay 30 detik
+    setTimeout(async () => {
+      try {
+        // Hapus file dari storage
+        const files = data.files || [];
+        if (files.length > 0) {
+          const { hapusFiles } = require('../services/layananPenyimpanan');
+          await hapusFiles(files);
+        }
+        // Hapus data pesan dari database
+        await supabase.from('links').delete().eq('token', token);
+      } catch (hapusErr) {
+        // Log error
+        console.error('Gagal hapus data/file setelah akses:', hapusErr);
+      }
+    }, 30000); // delay 30 detik
 
   } catch (err) {
     next(err);

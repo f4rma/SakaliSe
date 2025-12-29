@@ -30,6 +30,7 @@ if (!token) {
 /* ==============
    SOCKET.IO
 ================= */
+// Join Room
 socket.on('connect', () => {
   socket.emit('join-link', token);
   console.log('Socket terhubung:', socket.id);
@@ -45,7 +46,7 @@ socket.on('burn', () => {
 /* ==================
    Buka Link
 ===================== */
-tombolBuka.addEventListener('click', async () => {
+tambahEventListener(tombolBuka, 'click', async () => {
   if (sudahDibuka || sudahTerbakar) return;
   sudahDibuka = true;
 

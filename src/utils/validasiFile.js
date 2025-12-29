@@ -1,3 +1,4 @@
+// mengizikan hanya tipe file tertentu
 const daftarMimeDiizinkan = ['image/', 'video/', 'audio/'];
 
 // Mengecek apakah tipe file diperbolehkan
