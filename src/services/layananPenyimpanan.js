@@ -10,7 +10,7 @@ exports.hapusFiles = async files => {
 const supabase = require('../config/supabase');
 
 // unggah file ke supabase
-exports.uploadFiles = async (token, files) => {
+exports.unggahFile = async (token, files) => {
   const hasilUnggah = [];
 
   for (const file of files) {
