@@ -1,16 +1,7 @@
-// Hapus file dari Supabase Storage
-exports.hapusFiles = async files => {
-  if (!files || files.length === 0) return;
-  const paths = files.map(f => f.path);
-  const { error } = await supabase.storage
-    .from('sakalise-files')
-    .remove(paths);
-  if (error) throw error;
-};
 const supabase = require('../config/supabase');
 
 // unggah file ke supabase
-exports.unggahFile = async (token, files) => {
+exports.uploadFiles = async (token, files) => {
   const hasilUnggah = [];
 
   for (const file of files) {
@@ -34,15 +25,15 @@ exports.unggahFile = async (token, files) => {
   return hasilUnggah;
 };
 
-
 // Buat signed URL untuk file
-exports.buatSignedUrls = async files => {
+
+exports.createSignedUrls = async files => {
   const hasil = [];
 
   for (const file of files || []) {
     const { data } = await supabase.storage
       .from('sakalise-files')
-      .createSignedUrl(file.path);
+      .createSignedUrl(file.path, 60); // 60 detik
 
     hasil.push({
       ...file,
@@ -51,4 +42,13 @@ exports.buatSignedUrls = async files => {
   }
 
   return hasil;
+};
+
+exports.hapusFiles = async files => {
+  if (!files || files.length === 0) return;
+  const paths = files.map(f => f.path);
+  const { error } = await supabase.storage
+    .from('sakalise-files')
+    .remove(paths);
+  if (error) throw error;
 };

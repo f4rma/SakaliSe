@@ -46,7 +46,7 @@ socket.on('burn', () => {
 /* ==================
    Buka Link
 ===================== */
-tambahEventListener(tombolBuka, 'click', async () => {
+tombolBuka.addEventListener('click', async () => {
   if (sudahDibuka || sudahTerbakar) return;
   sudahDibuka = true;
 

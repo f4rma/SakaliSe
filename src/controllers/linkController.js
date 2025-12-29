@@ -2,8 +2,8 @@ const supabase = require('../config/supabase');
 const { buatToken } = require('../utils/buatToken');
 const { cekFileDiizinkan } = require('../utils/validasiFile');
 const {
-  unggahFile,
-  buatSignedUrls
+  uploadFiles,
+  createSignedUrls
 } = require('../services/layananPenyimpanan');
 const { kirimLinkSekaliPakai } = require('../services/layananEmail');
 
@@ -35,7 +35,7 @@ exports.buatTautan = async (req, res, next) => {
 
      // Upload file ke Supabase Storage
     const fileTersimpan =
-      files.length > 0 ? await unggahFile(token, files) : [];
+      files.length > 0 ? await uploadFiles(token, files) : [];
 
     // Simpan metadata ke database
     const { error } = await supabase.from('links').insert({
@@ -130,8 +130,7 @@ exports.aksesTautan = async (req, res, next) => {
 
     // Buat URL bertanda untuk file (hanya untuk sesi akses ini)
     const filesDenganUrl =
-      await buatSignedUrls(data.files || []);
-
+      await createSignedUrls(data.files || []);
 
     // Kirim respon ke client
     res.json({
@@ -143,7 +142,7 @@ exports.aksesTautan = async (req, res, next) => {
       }
     });
 
-    // Setelah pesan diakses, hapus data dan file dari Supabase dengan delay 30 detik
+  // Setelah pesan diakses, hapus data dan file dari Supabase dengan delay 30 detik
     setTimeout(async () => {
       try {
         // Hapus file dari storage
@@ -159,6 +158,7 @@ exports.aksesTautan = async (req, res, next) => {
         console.error('Gagal hapus data/file setelah akses:', hapusErr);
       }
     }, 30000); // delay 30 detik
+
 
   } catch (err) {
     next(err);
