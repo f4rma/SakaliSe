@@ -157,7 +157,7 @@ exports.aksesTautan = async (req, res, next) => {
         // Log error
         console.error('Gagal hapus data/file setelah akses:', hapusErr);
       }
-    }, 30000); // delay 30 detik
+    }, 86400); // delay 1 hari
 
 
   } catch (err) {
