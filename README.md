@@ -1,4 +1,4 @@
-# SakaliSe — Konten Sekali Akses
+# SakaliSe | Konten Sekali Akses 
 
 SakaliSe adalah aplikasi untuk membuat **tautan sekali pakai** berisi pesan teks dan/atau media seperti gambar, audio, dan video. Setelah tautan dibuka, konten dimusnahkan dan akan dibersihkan otomatis.
 
